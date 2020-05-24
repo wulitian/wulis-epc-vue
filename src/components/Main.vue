@@ -1,30 +1,38 @@
 <template>
   <a-layout id="components-layout-demo-top-side" style="min-height: 100vh">
         <a-layout-header class="header">
-          <div class="logo" />
+          <div class="logo"><img src="../../static/images/logo.png"><span>电力工程管理系统</span></div>
+          <a-dropdown class="avatar" :trigger="['click']">
+            <a class="ant-dropdown-link" @click="e => e.preventDefault()">
+              <a-avatar  icon="user" />
+            </a>
+            <a-menu slot="overlay">
+              <a-menu-item key="0">
+                <a href="http://www.alipay.com/">个人中心</a>
+              </a-menu-item>
+              <a-menu-item key="1">
+                <a href="http://www.taobao.com/">退出登录</a>
+              </a-menu-item>
+            </a-menu>
+          </a-dropdown>
         </a-layout-header>
         <a-layout>
           <a-layout-sider width="200" style="background: #fff">
             <a-menu
-              :defaultSelectedKeys="['1']"
-              :defaultOpenKeys="['2']"
+              :default-open-keys="openkeys"
+              :default-selected-keys="[$route.path]"
               mode="inline"
-              :inlineCollapsed="collapsed"
             >
               <template v-for="item in menuList[0].children">
-                <a-menu-item v-if="!item.children" :key="item.id">
+                <a-menu-item v-if="!item.children&&!item.hidden" :key="item.id">
                   <router-link :to="item.path"><span>{{ item.meta.title }}</span></router-link>
                 </a-menu-item>
-                <sub-menu v-else :menu-info="item" :key="item.id"/>
+                <SubMenu v-else :menu-info="item"/>
               </template>
             </a-menu>
           </a-layout-sider>
           <a-layout style="padding: 0 24px 24px">
-            <a-breadcrumb style="margin: 16px 0">
-              <a-breadcrumb-item>Home</a-breadcrumb-item>
-              <a-breadcrumb-item>List</a-breadcrumb-item>
-              <a-breadcrumb-item>App</a-breadcrumb-item>
-            </a-breadcrumb>
+            <Breadcrumb style="margin: 16px 0" />
             <a-layout-content
               :style="{ background: '#fff', padding: '24px', margin: 0, minHeight: '280px' }"
             >
@@ -36,14 +44,17 @@
 </template>
 <script>
   import SubMenu from './SubMenu'
+  import Breadcrumb from '@/components/Breadcrumb'
   export default {
     components: {
-      'sub-menu': SubMenu,
+      SubMenu,
+      Breadcrumb
     },
     name: 'Main',
     data () {
       return {
         collapsed: false,
+        openkeys:[],
       }
     },
     computed: {
@@ -53,18 +64,26 @@
       }
     },
     created(){
+      this.getOpenKey();
     },
     methods:{
-
+      getOpenKey(){
+        this.openkeys.push(this.$store.getters.routerList.find(item => item.id===(this.$store.getters.routerList.find(item => item.path === this.$route.path).parentId)).path);
+      }
     }
   }
 </script>
 <style>
   #components-layout-demo-top-side .logo {
-    width: 120px;
-    height: 31px;
-    background: rgba(255, 255, 255, 0.2);
-    margin: 16px 28px 16px 0;
     float: left;
+    height: 100%;
+    color: #fff;
+    font-size: 18px;
+  }
+  .avatar{
+    backgroundColor:#87d068;
+    cursor: pointer;
+    float: right;
+    margin-right: 15px;
   }
 </style>

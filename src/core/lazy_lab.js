@@ -59,6 +59,7 @@ import {
   ConfigProvider,
   Empty,
   Base,
+  FormModel,
 } from 'ant-design-vue';
 
 Vue.prototype.$message = message;
@@ -127,3 +128,4 @@ Vue.use(Skeleton);
 Vue.use(Comment);
 Vue.use(ConfigProvider);
 Vue.use(Empty);
+Vue.use(FormModel);

@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import router from './router'
 import store from './store'
-const defaultRoutePath = '/main/workplace'
+const defaultRoutePath = '/main'
 const whiteList = ['Login']
 import { ACCESS_TOKEN } from '@/store/mutation-types'
 router.beforeEach((to, from, next) => {
@@ -27,8 +27,10 @@ router.beforeEach((to, from, next) => {
       }
     }
   }else{
+    console.log("-----------------------")
     console.log(to.name)
     if (whiteList.includes(to.name)) {
+      console.log(to.name)
       next()
     } else {
       next({ path: '/login', query: { redirect: to.fullPath } })

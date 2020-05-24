@@ -10,7 +10,6 @@
   import zh_CN from 'ant-design-vue/lib/locale-provider/zh_CN';
   import moment from 'moment';
   import 'moment/locale/zh-cn';
-
   moment.locale('zh-cn');
 export default {
   name: 'App',
@@ -25,8 +24,8 @@ export default {
 <style>
   .ant-layout-header {
     height: 64px;
-    padding: 0 50px;
+    padding: 0;
     line-height: 64px;
-    background: #567aff;
+    background: #0f00f3;
   }
 </style>

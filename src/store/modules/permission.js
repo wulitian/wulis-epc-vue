@@ -6,12 +6,16 @@ const permission = {
   state: {
     routeState: true,
     routers: baseRouterMap,
-    addRouters: []
+    addRouters: [],
+    routerList:[]
   },
   mutations: {
     SET_ROUTERS: (state, routers) => {
       state.addRouters = routers
       state.routers = baseRouterMap.concat(routers)
+    },
+    SET_ROUTERS_LIST: (state, routers) => {
+      state.routerList = routers
     },
     SET_ROUTESTATE: (state, info) => {
       state.routeState = info
@@ -26,7 +30,8 @@ const permission = {
         // resolve()
         // 后台接口获取
         generatorDynamicRouter().then(res => {
-          commit('SET_ROUTERS', res)
+          commit('SET_ROUTERS', res.routers)
+          commit('SET_ROUTERS_LIST', res.routerList)
           commit('SET_ROUTESTATE', false)
           resolve()
         })

@@ -1,16 +1,17 @@
 import {getNav} from "@/api/login";
+import store from '@/store'
+import { ACCESS_TOKEN } from '@/store/mutation-types'
 // 根级菜单
 const rootRouter = {
   name: 'main',
   path: '/',
   component: 'components/BlankLayout',
-  redirect: '/main/workplace',
+  redirect: '/main',
   meta: {
     title: '首页'
   },
   children: []
 }
-
 /**
  * 动态生成菜单
  * @param token
@@ -19,31 +20,63 @@ const rootRouter = {
 export const generatorDynamicRouter = () => {
   return new Promise((resolve, reject) => {
     getNav().then(res => {
-      const { data } = res
-      let newDataAll = []
-      for (let i = 0; i < data.length; i++) {
-        let newData = {}
-        newData.name = data[i].component;
-        newData.path = data[i].route;
-        newData.parentId = data[i].parentId;
-        newData.id = data[i].menuId;
-        newData.component = data[i].component;
-        newData.show = data[i].enable;
-        var meta = {};
-        meta.title = data[i].menuName;
-        meta.show = data[i].enable;
-        newData.meta = meta;
-        newDataAll.push(newData)
-      }
-      const menuNav = []
-      const childrenNav = []
-      // 后端数据, 根级树数组,  根级 PID
-      listToTree(newDataAll, childrenNav, "0");
-      rootRouter.children = childrenNav
-      menuNav.push(rootRouter)
-      const routers = generator(menuNav)
-      resolve(routers)
+        const { data } = res
+        let newDataAll = []
+        for (let i = 0; i < data.length; i++) {
+          let newData = {}
+          newData.name = data[i].componentName;
+          newData.path = data[i].route;
+          newData.redirect = data[i].redirect;
+          newData.parentId = data[i].parentId;
+          newData.id = data[i].id;
+          newData.component = data[i].component;
+          newData.show = data[i].enable;
+          var meta = {};
+          meta.title = data[i].menuName;
+          meta.target = data[i].target;
+          meta.icon = data[i].icon
+          if(data[i].enable == '0'){
+            meta.show = false;
+          }else{
+            meta.show = true;
+          }
+          if(data[i].enable == '0'){
+            meta.hideChildren = false;
+          }else{
+            meta.hideChildren = true;
+          }
+          if(data[i].hiddenHeaderContent == '0'){
+            meta.hiddenHeaderContent = false;
+          }else{
+            meta.hiddenHeaderContent = true;
+          }
+          if(data[i].keepAlive == '0'){
+            meta.keepAlive = false;
+          }else{
+            meta.keepAlive = true;
+          }
+          newData.meta = meta;
+          newDataAll.push(newData)
+        }
+        const menuNav = []
+        const childrenNav = []
+        // 后端数据, 根级树数组,  根级 PID
+        listToTree(newDataAll, childrenNav, "0");
+        rootRouter.children = childrenNav
+        menuNav.push(rootRouter)
+        const routers = generator(menuNav)
+        let routerAll = {}
+        routerAll.routers = routers;
+        routerAll.routerList = newDataAll;
+        resolve(routerAll)
     }).catch(err => {
+      // Vue.ls.remove(ACCESS_TOKEN)
+      // this.$router.push("/login")
+      store.dispatch('Logout').then(() => {
+        setTimeout(() => {
+          window.location.reload()
+        }, 1500)
+      })
       reject(err)
     })
   })
@@ -58,12 +91,12 @@ export const generatorDynamicRouter = () => {
  */
 export const generator = (routerMap, parent) => {
   return routerMap.map(item => {
-    const { title, show, hideChildren, hiddenHeaderContent, target, icon } = item.meta || {}
+    const { title, show, hideChildren, hiddenHeaderContent, target, icon ,keepAlive} = item.meta || {}
     const currentRouter = {
       path: item.path ,
       name: item.name || '',
       component:()=> import(`@/${item.component}`),
-      meta: { title: title, icon: icon || undefined, hiddenHeaderContent: hiddenHeaderContent, target: target, permission: item.name }
+      meta: { title: title, icon: icon || undefined, hiddenHeaderContent: hiddenHeaderContent, target: target, permission: item.name ,keepAlive: keepAlive}
     }
     // 是否设置了隐藏菜单
     if (show === false) {

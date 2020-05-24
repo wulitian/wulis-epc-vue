@@ -1,5 +1,5 @@
 import Vue from 'vue'
-import { getToken , getUserInfo } from '@/api/login'
+import { getToken , getUserInfo ,logout} from '@/api/login'
 import { ACCESS_TOKEN } from '@/store/mutation-types'
 
 const user = {
@@ -16,7 +16,6 @@ const user = {
       state.username = username
     }
   },
-
   actions: {
     // 登录
     Login ({ commit }, data) {
