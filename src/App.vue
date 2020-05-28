@@ -22,6 +22,9 @@ export default {
 </script>
 
 <style>
+  #app{
+    min-height: 100%;
+  }
   .ant-layout-header {
     height: 64px;
     padding: 0;

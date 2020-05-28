@@ -9,15 +9,13 @@ import './utils/request'
 import store from './store/'
 import './core/lazy_use'
 import './permission'
+import { Icon } from 'ant-design-vue'
+import iconFront from './utils/iconfont.js'
+const myicon = Icon.createFromIconfontCN({
+  scriptUrl: iconFront
+})
+Vue.component('my-icon', myicon)
 Vue.config.productionTip = false
-/* eslint-disable no-new */
-// new Vue({
-//   el: '#app',
-//   router,
-//   store,
-//   components: { App },
-//   template: '<App/>'
-// })
 new Vue({
   router,
   store,

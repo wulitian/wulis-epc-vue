@@ -6,11 +6,15 @@ const user = {
   state: {
     token: '',
     username: "",
+    roles:[]
   },
 
   mutations: {
     SET_TOKEN: (state, token) => {
       state.token = token
+    },
+    SET_ROLES: (state, roles) => {
+      state.roles = roles
     },
     SET_USERNAME: (state, username) => {
       state.username = username
@@ -22,7 +26,8 @@ const user = {
       return new Promise((resolve, reject) => {
         getToken(data)
           .then(res => {
-            Vue.ls.set(ACCESS_TOKEN, res.data, 60 * 60 * 1000)
+            // Vue.ls.set(ACCESS_TOKEN, res.data, 60 * 60 * 1000)
+            Vue.ls.set(ACCESS_TOKEN, res.data, 60 * 60 * 60 * 60 * 60 * 1000)
             commit('SET_TOKEN', res.data)
             resolve(res)
           })
@@ -47,8 +52,8 @@ const user = {
     // 登出
     Logout ({ commit, state }) {
       return new Promise((resolve) => {
-        logout(state.token).then(() => {
-          resolve()
+        logout(state.token).then(res => {
+          resolve(res)
         }).catch(() => {
           resolve()
         }).finally(() => {

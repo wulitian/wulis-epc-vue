@@ -11,7 +11,7 @@
                 <a href="http://www.alipay.com/">个人中心</a>
               </a-menu-item>
               <a-menu-item key="1">
-                <a href="http://www.taobao.com/">退出登录</a>
+                <a href="#" @click="userLogout">退出登录</a>
               </a-menu-item>
             </a-menu>
           </a-dropdown>
@@ -45,6 +45,7 @@
 <script>
   import SubMenu from './SubMenu'
   import Breadcrumb from '@/components/Breadcrumb'
+  import { mapActions } from 'vuex'
   export default {
     components: {
       SubMenu,
@@ -67,8 +68,24 @@
       this.getOpenKey();
     },
     methods:{
+      ...mapActions(['Logout']),
       getOpenKey(){
         this.openkeys.push(this.$store.getters.routerList.find(item => item.id===(this.$store.getters.routerList.find(item => item.path === this.$route.path).parentId)).path);
+      },
+      userLogout(){
+        this.Logout()
+          .then((res) => {
+            console.log(res)
+            if(res.code==2020200){
+              this.$message.info(res.message);
+            }else{
+              this.$message.info(res.message);
+            }
+          })
+          .catch(err => console.log(err))
+          .finally(() => {
+            this.$router.push("/login")
+          })
       }
     }
   }

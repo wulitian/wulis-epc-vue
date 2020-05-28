@@ -4,6 +4,11 @@ export const baseRouterMap = [
     path: '/login',
     name: 'Login',
     component: () => import('@/components/Login'),
+  },
+  {
+    path: '/Test',
+    name: 'Test',
+    component: () => import('@/components/Test'),
   }
 ]
 //异步路由

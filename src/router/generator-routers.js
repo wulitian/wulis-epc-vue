@@ -23,40 +23,26 @@ export const generatorDynamicRouter = () => {
         const { data } = res
         let newDataAll = []
         for (let i = 0; i < data.length; i++) {
-          let newData = {}
-          newData.name = data[i].componentName;
-          newData.path = data[i].route;
-          newData.redirect = data[i].redirect;
-          newData.parentId = data[i].parentId;
-          newData.id = data[i].id;
-          newData.component = data[i].component;
-          newData.show = data[i].enable;
-          var meta = {};
-          meta.title = data[i].menuName;
-          meta.target = data[i].target;
-          meta.icon = data[i].icon
-          if(data[i].enable == '0'){
-            meta.show = false;
-          }else{
-            meta.show = true;
+          if(data[i].menuType==0){
+            let newData = {}
+            newData.name = data[i].componentName;
+            newData.path = data[i].route;
+            newData.redirect = data[i].redirect;
+            newData.parentId = data[i].parentId;
+            newData.id = data[i].id;
+            newData.component = data[i].component;
+            newData.show = data[i].enable;
+            var meta = {};
+            meta.title = data[i].menuName;
+            meta.target = data[i].target;
+            meta.icon = data[i].icon
+            meta.show = data[i].enable == '0'?false:true;
+            meta.hideChildren = data[i].enable == '0'?false:true;
+            meta.hiddenHeaderContent = data[i].hiddenHeaderContent == '0'?false:true;
+            meta.keepAlive = data[i].keepAlive == '0'?false:true;
+            newData.meta = meta;
+            newDataAll.push(newData)
           }
-          if(data[i].enable == '0'){
-            meta.hideChildren = false;
-          }else{
-            meta.hideChildren = true;
-          }
-          if(data[i].hiddenHeaderContent == '0'){
-            meta.hiddenHeaderContent = false;
-          }else{
-            meta.hiddenHeaderContent = true;
-          }
-          if(data[i].keepAlive == '0'){
-            meta.keepAlive = false;
-          }else{
-            meta.keepAlive = true;
-          }
-          newData.meta = meta;
-          newDataAll.push(newData)
         }
         const menuNav = []
         const childrenNav = []

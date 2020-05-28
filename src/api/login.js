@@ -1,20 +1,5 @@
 import axios from '@/utils/request'
-
-/**
- * 测试
- * @param id
- */
-export const test = (id) => {
-  const params = { id: id }
-  return axios({
-    url: '/api/test',
-    data: params,
-    method: 'get',
-    // headers:{
-    //   "Content-Type":"application/json"
-    // }
-  })
-}
+import qs from 'qs'
 
 /**
  * 获取用户信息
@@ -33,7 +18,7 @@ export const getUserInfo = () => {
  */
 export const getToken = (data) => {
   return axios({
-    url: '/web/form/login?'+data,
+    url: '/web/form/login?'+qs.stringify(data),
     method: 'get',
   })
 }

@@ -5,7 +5,7 @@
 </template>
 
 <script>
-  import {test,getUserInfo,getToken} from "@/api/login";
+  import {getUserInfo,getToken} from "@/api/login";
   import { mapActions } from 'vuex'
   export default {
   name: 'Workplace',
@@ -15,22 +15,12 @@
     }
   },
   created(){
-    this.haha();
     this.gotoUserInfo();
     this.gotoToken();
     console.log('获取vuexgetUserName',this.$store.getters.getUserName)
   },
   methods:{
     ...mapActions(['GetUserInfo', 'Login']),
-    haha(){
-      test(1)
-        .then(res => {
-          console.log(res)
-        })
-        .catch((e) => {
-          console.log(e)
-        })
-    },
     gotoUserInfo(){
       this.GetUserInfo()
         .then((res) => console.log(res))
