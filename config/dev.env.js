@@ -11,5 +11,5 @@ const prodEnv = require('./prod.env')
 // 这个就是用来上线的时候用到，来决定是开发环境还是生产环境，来进行相关的配置解决方案
 module.exports = merge(prodEnv, {
   NODE_ENV: '"development"',
-  API_ROOT: '"http://47.99.218.127:8088"'
+  API_ROOT: '"http://127.0.0.1:8080"'
 })
