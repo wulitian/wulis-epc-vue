@@ -58,3 +58,13 @@ export const updateContractInfo = (data) => {
     method: 'put',
   })
 }
+/**
+ * 合同附件上传
+ */
+export const attachmentUpload = (data) => {
+  return axios({
+    url: '/web/pcm/contract/info/uploadContractInfo',
+    data:data,
+    method: 'post',
+  })
+}

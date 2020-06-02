@@ -59,7 +59,6 @@
         :label-col="labelCol"
         :wrapper-col="wrapperCol"
       >
-        <a-input v-model="uploadDataString" hidden/>
         <a-row>
           <a-col :span="8">
             <a-form-model-item label="工程编号" prop="number">
@@ -171,7 +170,7 @@
         </a-row>
         <a-row>
           <a-form-model-item :wrapper-col="{ span: 20, offset: 0 }" :label-col="{ span: 3 }" style="margin-left: -18px" label="已上传文件" >
-            <a-table :columns="uploadColumns" rowKey="id" :data-source="uploadData" :pagination="false">
+            <a-table :columns="uploadColumns" rowKey="id" :data-source="fileRecordList" :pagination="false">
               <span slot="action" slot-scope="text, record">
                   <a href="#" @click="deleteUpload(record)">删除</a>
               </span>
@@ -185,7 +184,6 @@
               :before-upload="beforeUpload"
               :file-list="fileList"
               :transform-file="transformFile"
-              :default-file-list="defaultFileList"
             >
               <a-button> <a-icon type="upload" /> 选择附件</a-button>
             </a-upload>
@@ -217,7 +215,7 @@
 </template>
 
 <script>
-  import {insertEngineeringManage,updateEngineeringManage,attachmentUpload,batchDeleteEngineeringManage,queryEngineeringManageList,queryEngineeringManagePage,deleteEngineeringManageByid} from "@/api/ProjectInformationManagement/ProjectItem/ProjectManagement";
+  import {insertEngineeringManage,queryEngineeringManageByid,updateEngineeringManage,attachmentUpload,batchDeleteEngineeringManage,queryEngineeringManageList,queryEngineeringManagePage,deleteEngineeringManageByid} from "@/api/ProjectInformationManagement/ProjectItem/ProjectManagement";
   import {queryProjectTypeList} from "@/api/ProjectInformationManagement/ProjectCode/ItemType";
   import {queryEngineeringTypeList} from "@/api/ProjectInformationManagement/ProjectCode/ProjectType";
   import {queryEngineeringUseList} from "@/api/ProjectInformationManagement/ProjectCode/ProjectUse";
@@ -237,36 +235,16 @@
     { title: '操作',dataIndex: 'action', scopedSlots: { customRender: 'action' } },
   ];
   const uploadColumns = [
-    { title: '文件名称',dataIndex: 'fileName',key: 'fileName' },
-    { title: '文件路径',dataIndex: 'filePath',key: 'filePath' },
-    { title: '操作',dataIndex: 'action', scopedSlots: { customRender: 'action' } },
+    { title: '文件名称',dataIndex: 'fileName',key: 'fileName' ,width:200},
+    { title: '文件路径',dataIndex: 'fileUrl',key: 'fileUrl',width:200},
+    { title: '文件大小',dataIndex: 'fileSize',key: 'fileSize',width:200},
+    { title: '文件类型',dataIndex: 'fileExt',key: 'fileExt' ,width:200},
+    { title: '操作',dataIndex: 'action', scopedSlots: { customRender: 'action' } ,width:200},
   ];
-  const defaultFileList=[
-    {
-      uid: '1',
-      name: 'xxx.png',
-      status: 'done',
-      response: 'Server Error 500', // custom error message to show
-      url: 'http://www.baidu.com/xxx.png',
-    },
-    {
-      uid: '2',
-      name: 'yyy.png',
-      status: 'done',
-      url: 'http://www.baidu.com/yyy.png',
-    },
-    {
-      uid: '3',
-      name: 'zzz.png',
-      status: 'error',
-      response: 'Server Error 500', // custom error message to show
-      url: 'http://www.baidu.com/zzz.png',
-    }];
   //弹窗混入
   const modalMixins = {
     data () {
       return {
-        defaultFileList,
         modalState:false,
         modalTitle:'',
         addStatus:true,
@@ -319,10 +297,20 @@
         this.modalTitle = '新增工程名称';
         this.addStatus = true;
         this.form = {
-          name:'',
-          description:'',
-          enable:1
+            address:'',
+            attachmentUrl:'',
+            description:'',
+            enable:1,
+            entryTime:'',
+            name:'',
+            number:'',
+            projectTypeId:'',
+            structureId:'',
+            typeId:'',
+            undertakeId:'',
+            useId:'',
         };
+        this.fileRecordList = [];
       }
     }
   };
@@ -335,7 +323,6 @@
         id:'',
         form:{
           address:'',
-          attachmentUrl:'',
           description:'',
           enable:1,
           entryTime:'',
@@ -360,17 +347,8 @@
           address: [{ required: true, message: '请输入项目地点', trigger: 'blur' }],
         },
         uploading:false,
+        fileRecordList:[],
         fileList:[]
-      }
-    },
-    computed: {
-      uploadDataString: function () {
-        let path = "";
-        this.uploadData.forEach((e)=>{
-          path+=e.filePath+','
-        })
-        this.form.attachmentUrl = path;
-        return path
       }
     },
     created () {
@@ -381,7 +359,7 @@
         this.$refs.ruleForm.validate(valid => {
           console.log(this.form)
           if (valid) {
-            insertEngineeringManage(this.form)
+            insertEngineeringManage(Object.assign(this.form,{fileRecordList:this.fileRecordList}))
               .then(res => {
                 if(res.code==2020200){
                   console.log(res)
@@ -404,20 +382,20 @@
       onUpdate(){
         this.$refs.ruleForm.validate(valid => {
           if (valid) {
-            // updateUser(params)
-            //   .then(res => {
-            //     if(res.code==2020200){
-            //       console.log(res)
-            //       this.onSelectUserList();
-            //       this.updateModal = false;
-            //       this.$message.info(res.message);
-            //     }else{
-            //       this.$message.info(res.message);
-            //     }
-            //   })
-            //   .catch((e) => {
-            //     console.log(e)
-            //   })
+            updateEngineeringManage(Object.assign(this.form,{id:this.id,fileRecordList:this.fileRecordList}))
+              .then(res => {
+                if(res.code==2020200){
+                  console.log(res)
+                  this.queryEngineeringManagePage();
+                  this.modalState = false;
+                  this.$message.info(res.message);
+                }else{
+                  this.$message.info(res.message);
+                }
+              })
+              .catch((e) => {
+                console.log(e)
+              })
           } else {
             return false;
           }
@@ -448,10 +426,9 @@
           .then(res => {
             if(res.code==2020200){
               res.data.forEach((e)=>{
-                this.uploadData.push(e);
+                this.fileRecordList.push(e);
               })
               this.fileList = [];
-              console.log(this.uploadData)
               this.uploading = false;
               this.$message.info(res.message);
             }else{
@@ -464,9 +441,9 @@
       },
       //删除已上传
       deleteUpload(record){
-        for (let i = 0; i < this.uploadData.length; i++) {
-          if(this.uploadData[i].filePath == record.filePath){
-            this.uploadData.splice(i, 1);
+        for (let i = 0; i < this.fileRecordList.length; i++) {
+          if(this.fileRecordList[i].id == record.id){
+            this.fileRecordList.splice(i, 1);
             i--;
           }
         }
@@ -510,7 +487,6 @@
         columns,
         uploadColumns,
         data:[],
-        uploadData:[],
         ProjectTypeList:[],
         EngineeringTypeList:[],
         EngineeringUseList:[],
@@ -625,27 +601,48 @@
         this.modalState = true;
         this.modalTitle = '修改工程名称';
         this.addStatus = false;
-        // queryUserByid({id:record.id})
-        //   .then(res => {
-        //     if(res.code==2020200){
-        //       this.form = {
-        //         name:res.data.name,
-        //         description:res.data.description,
-        //         enable:res.data.enable,
-        //       };
-        //       this.id = res.data.id;
-        //     }else{
-        //       this.$message.info(res.message);
-        //     }
-        //   })
-        //   .catch((e) => {
-        //     console.log(e)
-        //   })
-        console.log(record)
+        queryEngineeringManageByid({id:record.id})
+          .then(res => {
+            if(res.code==2020200){
+              console.log(res,res)
+              this.form = {
+                address:res.data.address,
+                attachmentUrl:res.data.attachmentUrl,
+                description:res.data.description,
+                enable:res.data.enable,
+                entryTime:res.data.entryTime,
+                name:res.data.name,
+                number:res.data.number,
+                projectTypeId:res.data.projectTypeId+'',
+                structureId:res.data.structureId+'',
+                typeId:res.data.typeId+'',
+                undertakeId:res.data.undertakeId+'',
+                useId:res.data.useId+'',
+              };
+              this.id = res.data.id;
+              this.fileRecordList = res.data.fileRecordList;
+            }else{
+              this.$message.info(res.message);
+            }
+          })
+          .catch((e) => {
+            console.log(e)
+          })
       },
       // 删除确认
       onDeleteConfirm (record) {
-        console.log(record)
+        deleteEngineeringManageByid({id:record.id})
+          .then(res => {
+            if(res.code==2020200){
+              this.queryEngineeringManagePage();
+              this.$message.info(res.message);
+            }else{
+              this.$message.info(res.message);
+            }
+          })
+          .catch((e) => {
+            console.log(e)
+          })
       },
       // 删除取消
       onDeleteCancel (record) {

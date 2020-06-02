@@ -5,7 +5,7 @@
       <a-col class="gutter-row" :span="4">
         <div class="gutter-box">
           <label>合同类目:</label>
-          <a-input placeholder="合同类目" v-model="headerForm.htlm"/>
+          <a-input placeholder="合同类目" v-model="headerForm.categoryName"/>
         </div>
       </a-col>
       <a-col class="gutter-row" :span="4">
@@ -33,8 +33,6 @@
     <a-spin :spinning="spinning">
       <a-table :columns="columns" rowKey="id" :data-source="data" :pagination="false">
       <span slot="action" slot-scope="text, record">
-        <a @click="onView(record)">查看</a>
-        <a-divider type="vertical" />
         <a @click="onToUpdate(record)">修改</a>
         <a-divider type="vertical" />
         <a-popconfirm title="你确定删除吗？" ok-text="确定" cancel-text="取消" @confirm="onDeleteConfirm(record)" @cancel="onDeleteCancel">
@@ -55,11 +53,11 @@
         :label-col="labelCol"
         :wrapper-col="wrapperCol"
       >
-        <a-form-model-item label="合同类目" prop="htlm">
-          <a-input v-model="form.htlm" placeholder="合同类目"/>
+        <a-form-model-item label="合同类目" prop="categoryName">
+          <a-input v-model="form.categoryName" placeholder="合同类目"/>
         </a-form-model-item>
-        <a-form-model-item label="描述" prop="ms">
-          <a-input v-model="form.ms" placeholder="描述"/>
+        <a-form-model-item label="描述" prop="description">
+          <a-input v-model="form.description" placeholder="描述"/>
         </a-form-model-item>
         <a-form-model-item label="启用状态" prop="enable">
           <a-radio-group v-model="form.enable">
@@ -88,10 +86,10 @@
 </template>
 
 <script>
-
+  import {deleteContractCategoryByid,insertContractCategory,queryContractCategoryByid,queryContractCategoryList,queryContractCategoryPage,updateContractCategory,uploadContractInfo} from "@/api/ItemContractManagement/ContractCategory";
   const columns = [
-    { title: '合同类目名称',dataIndex: 'htlm',key: 'htlm' },
-    { title: '描述',dataIndex: 'ms',key: 'ms' },
+    { title: '合同类目名称',dataIndex: 'categoryName',key: 'categoryName' },
+    { title: '描述',dataIndex: 'description',key: 'description' },
     { title: '启用状态',dataIndex: 'enable',key: 'enable' },
     { title: '创建时间',dataIndex: 'createTime',key: 'createTime' },
     { title: '操作',dataIndex: 'action', scopedSlots: { customRender: 'action' } },
@@ -99,15 +97,15 @@
   const data = [
     {
       id: '1',
-      htlm: '体育运动',
-      ms: '无',
+      categoryName: '体育运动',
+      description: '无',
       enable: '启用',
       createTime: '2020-10-10',
     },
     {
       id: '2',
-      htlm: '体育运动2',
-      ms: '无',
+      categoryName: '体育运动2',
+      description: '无',
       enable: '启用',
       createTime: '2020-10-10',
     },
@@ -151,7 +149,7 @@
     data () {
       return {
         headerForm:{
-          htlm:'',
+          categoryName:'',
           enable:''
         }
       }
@@ -159,6 +157,7 @@
     methods: {
       // 搜索
       onSearch () {
+        this.queryContractCategoryPage();
       },
       // 去添加
       onToAdd () {
@@ -166,8 +165,8 @@
         this.modalTitle = '新增合同类目';
         this.addStatus = true;
         this.form = {
-          htlm:'',
-          ms:'',
+          categoryName:'',
+          description:'',
           enable:1
         };
       }
@@ -181,13 +180,13 @@
         wrapperCol: { span: 14 },
         id:'',
         form:{
-          htlm:'',
-          ms:'',
+          categoryName:'',
+          description:'',
           enable:1
         },
         rules: {
-          htlm: [{ required: true, message: '请输入合同类目', trigger: 'blur' }],
-          ms: [{ required: true, message: '请输入描述', trigger: 'blur' }],
+          categoryName: [{ required: true, message: '请输入合同类目', trigger: 'blur' }],
+          description: [{ required: true, message: '请输入描述', trigger: 'blur' }],
         }
       }
     },
@@ -198,20 +197,20 @@
       onAdd(){
         this.$refs.ruleForm.validate(valid => {
           if (valid) {
-            // addUser(params)
-            //   .then(res => {
-            //     if(res.code==2020200){
-            //       console.log(res)
-            //       this.onSelectUserList();
-            //       this.updateModal = false;
-            //       this.$message.info(res.message);
-            //     }else{
-            //       this.$message.info(res.message);
-            //     }
-            //   })
-            //   .catch((e) => {
-            //     console.log(e)
-            //   })
+            insertContractCategory(this.form)
+              .then(res => {
+                if(res.code==2020200){
+                  console.log(res)
+                  this.queryContractCategoryPage();
+                  this.modalState = false;
+                  this.$message.info(res.message);
+                }else{
+                  this.$message.info(res.message);
+                }
+              })
+              .catch((e) => {
+                console.log(e)
+              })
           } else {
             return false;
           }
@@ -221,20 +220,20 @@
       onUpdate(){
         this.$refs.ruleForm.validate(valid => {
           if (valid) {
-            // updateUser(params)
-            //   .then(res => {
-            //     if(res.code==2020200){
-            //       console.log(res)
-            //       this.onSelectUserList();
-            //       this.updateModal = false;
-            //       this.$message.info(res.message);
-            //     }else{
-            //       this.$message.info(res.message);
-            //     }
-            //   })
-            //   .catch((e) => {
-            //     console.log(e)
-            //   })
+            updateContractCategory(Object.assign(this.form,{id:this.id}))
+              .then(res => {
+                if(res.code==2020200){
+                  console.log(res)
+                  this.queryContractCategoryPage();
+                  this.modalState = false;
+                  this.$message.info(res.message);
+                }else{
+                  this.$message.info(res.message);
+                }
+              })
+              .catch((e) => {
+                console.log(e)
+              })
           } else {
             return false;
           }
@@ -260,8 +259,28 @@
       }
     },
     created () {
+      this.queryContractCategoryPage();
     },
     methods: {
+      //查询
+      queryContractCategoryPage(){
+        this.spinning = true;
+        queryContractCategoryPage(Object.assign(this.page,this.headerForm))
+          .then(res => {
+            if(res.code==2020200){
+              console.log(res)
+              this.data = res.data.records;
+              this.total = res.data.total;
+              this.spinning = false;
+            }else{
+              this.$message.info(res.message);
+              this.spinning = false;
+            }
+          })
+          .catch((e) => {
+            console.log(e)
+          })
+      },
       // 查看
       onView (record) {
         console.log(record)
@@ -271,27 +290,28 @@
         this.modalState = true;
         this.modalTitle = '修改合同类目';
         this.addStatus = false;
-        // queryUserByid({id:record.id})
-        //   .then(res => {
-        //     if(res.code==2020200){
-        //       this.form = {
-        //         htlm:res.data.htlm,
-        //         ms:res.data.ms,
-        //         enable:res.data.enable,
-        //       };
-        //       this.id = res.data.id;
-        //     }else{
-        //       this.$message.info(res.message);
-        //     }
-        //   })
-        //   .catch((e) => {
-        //     console.log(e)
-        //   })
+        this.form = {
+          categoryName:record.categoryName,
+          description:record.description,
+          enable:record.enable
+        };
+        this.id = record.id;
         console.log(record)
       },
       // 删除确认
       onDeleteConfirm (record) {
-        console.log(record)
+        deleteContractCategoryByid({id:record.id})
+          .then(res => {
+            if(res.code==2020200){
+              this.queryContractCategoryPage();
+              this.$message.info(res.message);
+            }else{
+              this.$message.info(res.message);
+            }
+          })
+          .catch((e) => {
+            console.log(e)
+          })
       },
       // 删除取消
       onDeleteCancel (record) {

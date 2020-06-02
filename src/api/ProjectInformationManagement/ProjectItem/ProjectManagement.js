@@ -68,3 +68,12 @@ export const deleteEngineeringManageByid = (data) => {
     method: 'delete',
   })
 }
+/**
+ * 删除工程根据id
+ */
+export const queryEngineeringManageByid = (data) => {
+  return axios({
+    url: '/web/epc/engineering/manage/getById/'+data.id,
+    method: 'get',
+  })
+}

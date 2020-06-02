@@ -40,3 +40,12 @@ export const deleteFaxmByid = (data) => {
     method: 'delete',
   })
 }
+/**
+ * 根据工程id查询可用项目列表
+ */
+export const queryFaxmList = () => {
+  return axios({
+    url: '/web/epc/project/manage/getList',
+    method: 'get',
+  })
+}
