@@ -2,7 +2,7 @@
   <div class="container">
     <div class="login-form-group">
       <div class="left-group"></div>
-      <div class="bt"><img src="../../static/images/logo.png"><span>电力工程管理系统</span></div>
+      <div class="bt"><img src="../../static/images/logo.png"><span>沂水县供电公司电力工程项目管理平台</span></div>
       <div class="form-group">
         <img src="../../static/images/loginuser.png"/>
         <input type="text" placeholder="请输入账号" v-model="form.account"/>
@@ -67,7 +67,7 @@
     position: fixed;
   }
     .bt{
-      font-size: 20px;
+      font-size: 18px;
       color: #2979ff;
       font-weight: 700;
       margin-bottom: 20px;

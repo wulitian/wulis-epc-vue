@@ -27,8 +27,8 @@ export default {
   }
   .ant-layout-header {
     height: 64px;
-    padding: 0;
+    padding: 0px!important;
     line-height: 64px;
-    background: #0f00f3;
+    background: #0f00f3!important;
   }
 </style>

@@ -1,7 +1,7 @@
 <template>
   <a-layout id="components-layout-demo-top-side" style="min-height: 100vh">
         <a-layout-header class="header">
-          <div class="logo"><img src="../../static/images/logo.png"><span>电力工程管理系统</span></div>
+          <div class="logo"><img src="../../static/images/logo.png"><span>沂水县供电公司电力工程项目管理平台</span></div>
           <a-dropdown class="avatar" :trigger="['click']">
             <a class="ant-dropdown-link" @click="e => e.preventDefault()">
               <a-avatar  icon="user" />
@@ -31,10 +31,10 @@
               </template>
             </a-menu>
           </a-layout-sider>
-          <a-layout style="padding: 0 24px 24px">
+          <a-layout style="padding: 0 24px 24px;">
             <Breadcrumb style="margin: 16px 0" />
             <a-layout-content
-              :style="{ background: '#fff', padding: '24px', margin: 0, minHeight: '280px' }"
+              :style="{ background: '#fff', padding: '24px', margin: 0, minHeight: '280px',height: '100%'}"
             >
               <router-view></router-view>
             </a-layout-content>

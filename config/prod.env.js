@@ -6,5 +6,5 @@
 //NODE_ENV决定生产环境
 module.exports = {
   NODE_ENV: '"production"',
-  API_ROOT: '"http://127.0.0.1:8080"'
+  API_ROOT: '"http://47.99.218.127:8088"'
 }
