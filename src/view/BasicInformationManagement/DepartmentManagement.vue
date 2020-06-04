@@ -46,7 +46,15 @@
     </div>
     <!-- 列表 -->
     <a-spin :spinning="spinning">
-      <a-table :columns="columns" :data-source="data" rowKey="id" childrenColumnName="nodes" :pagination="false" :row-selection="rowSelection" >
+      <a-table  bordered :columns="columns" :data-source="data" rowKey="id" childrenColumnName="nodes" :pagination="false" >
+      <span slot="enable" slot-scope="enable">
+         <a-tag color="green" v-if="enable==0">
+           禁用
+        </a-tag>
+        <a-tag color="cyan" v-if="enable==1">
+           启用
+        </a-tag>
+      </span>
         <span slot="action" slot-scope="text, record">
           <a @click="onToUpdate(record)">修改</a>
           <a-divider type="vertical" />
@@ -124,25 +132,15 @@
 <script>
   import {deleteDepartmentById,insertDepartment,queryDepartmentByid,queryDepartmentTree,updateDepartment} from "@/api/BasicInformationManagement/DepartmentManagement";
   import {queryOrganizationList} from "@/api/BasicInformationManagement/OrganizationManagement";
+
   const columns = [
     { title: '名称',dataIndex: 'departmentName',key: 'departmentName' },
     { title: '所属机构',dataIndex: 'organizationName',key: 'organizationName' },
     { title: '排序',dataIndex: 'sort',key: 'sort' },
     { title: '创建时间',dataIndex: 'createTime',key: 'createTime' },
-    { title: '启用状态',dataIndex: 'enable',key: 'enable' },
+    { title: '启用状态',dataIndex: 'enable',key: 'enable' ,scopedSlots: { customRender: 'enable' }, },
     { title: '操作',dataIndex: 'action', scopedSlots: { customRender: 'action' } },
   ];
-  const rowSelection = {
-    onChange: (selectedRowKeys, selectedRows) => {
-      console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
-    },
-    onSelect: (record, selected, selectedRows) => {
-      console.log(record, selected, selectedRows);
-    },
-    onSelectAll: (selected, selectedRows, changeRows) => {
-      console.log(selected, selectedRows, changeRows);
-    },
-  };
   //头部混入
   const headMixins = {
     data () {
@@ -153,8 +151,6 @@
           organizationId:'',
         }
       }
-    },
-    created () {
     },
     methods: {
       // 搜索
@@ -184,7 +180,6 @@
         data :[],
         selectTreeData:[],
         organizationList:[],
-        rowSelection
       }
     },
     created () {
@@ -198,7 +193,6 @@
         this.spinning = true;
         queryDepartmentTree(this.headerForm)
           .then(res => {
-            console.log(res)
             if(res.code==2020200){
               this.data = res.data
               this.spinning = false;
@@ -215,11 +209,9 @@
       queryDepartmentTreeSelect(){
         queryDepartmentTree()
           .then(res => {
-            console.log(res)
             if(res.code==2020200){
               this.selectTreeData = res.data;
               this.getTree(this.selectTreeData);
-              console.log(this.selectTreeData)
             }else{
               this.$message.info(res.message);
             }
@@ -233,7 +225,6 @@
         queryOrganizationList()
           .then(res => {
             if(res.code==2020200){
-              console.log(res);
               this.organizationList = res.data;
             }else{
               this.$message.info(res.message);
@@ -268,7 +259,6 @@
           .catch((e) => {
             console.log(e)
           })
-        console.log(record)
       },
       // 删除确认
       onDeleteConfirm (record) {
@@ -285,7 +275,6 @@
           .catch((e) => {
             console.log(e)
           })
-        console.log(record)
       },
       // 删除取消
       onDeleteCancel (record) {
@@ -335,11 +324,9 @@
       onAdd(){
         this.$refs.ruleForm.validate(valid => {
           if (valid) {
-            console.log(this.form)
             insertDepartment(this.form)
               .then(res => {
                 if(res.code==2020200){
-                  console.log(res)
                   this.queryDepartmentTreeFun();
                   this.queryDepartmentTreeSelect();
                   this.modalState = false;
@@ -358,7 +345,6 @@
       onUpdate(){
         this.$refs.ruleForm.validate(valid => {
           if (valid) {
-            console.log('部门修改参数',Object.assign(this.form,{id:this.id}))
             updateDepartment(Object.assign(this.form,{id:this.id}))
               .then(res => {
                 if(res.code==2020200){
@@ -412,7 +398,7 @@
 }
 </script>
 
-<style scoped>
+<style scoped >
   tr:last-child td {
     padding-bottom: 0;
   }

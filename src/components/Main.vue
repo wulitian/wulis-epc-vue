@@ -60,7 +60,6 @@
     },
     computed: {
       menuList: function () {
-        console.log(this.$store.getters.addRouters.find(item => item.path === '/').children)
         return this.$store.getters.addRouters.find(item => item.path === '/').children
       }
     },
@@ -75,7 +74,6 @@
       userLogout(){
         this.Logout()
           .then((res) => {
-            console.log(res)
             if(res.code==2020200){
               this.$message.info(res.message);
             }else{
@@ -102,5 +100,22 @@
     cursor: pointer;
     float: right;
     margin-right: 15px;
+  }
+  .ant-menu-inline .ant-menu-submenu {
+    padding-bottom: 0px!important;
+  }
+  .ant-menu-inline > .ant-menu-submenu > .ant-menu-submenu-title {
+    margin: 0!important;
+  }
+  .ant-menu-inline .ant-menu-item:not(:last-child) {
+    margin-bottom: 0!important;
+    margin-top: 0!important;
+  }
+  .ant-menu-inline .ant-menu-item:last-child {
+    margin-bottom: 0!important;
+    margin-top: 0!important;
+  }
+  .ant-menu-submenu > .ant-menu {
+    background-color: #fafafa!important;
   }
 </style>

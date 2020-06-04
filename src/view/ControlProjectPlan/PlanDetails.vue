@@ -75,7 +75,7 @@
     </div>
     <!-- 列表 -->
     <a-spin :spinning="spinning">
-      <a-table :columns="columns" rowKey="id" :data-source="data" :pagination="false">
+      <a-table :rowClassName="(record, index)=>{return index % 2 === 1? 'odd' : 'even'}" bordered :columns="columns" rowKey="id" :data-source="data" :pagination="false">
       <span slot="action" slot-scope="text, record">
         <a @click="onView(record)">查看</a>
       </span>
@@ -623,6 +623,12 @@
 </script>
 
 <style scoped>
+  /deep/ .even{
+    background:#ffffff;
+  }
+  /deep/ .odd{
+    background: #fafafa;
+  }
   tr:last-child td {
     padding-bottom: 0;
   }

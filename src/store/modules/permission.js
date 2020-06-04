@@ -7,15 +7,19 @@ const permission = {
     routeState: true,
     routers: baseRouterMap,
     addRouters: [],
-    routerList:[]
+    routerList:[],
+    permissionMarkList:[]
   },
   mutations: {
     SET_ROUTERS: (state, routers) => {
       state.addRouters = routers
       state.routers = baseRouterMap.concat(routers)
     },
-    SET_ROUTERS_LIST: (state, routers) => {
-      state.routerList = routers
+    SET_ROUTERS_LIST: (state, routerList) => {
+      state.routerList = routerList
+    },
+    SET_PERMISSIONMARK_LIST: (state, permissionMarkList) => {
+      state.permissionMarkList = permissionMarkList
     },
     SET_ROUTESTATE: (state, info) => {
       state.routeState = info
@@ -32,6 +36,7 @@ const permission = {
         generatorDynamicRouter().then(res => {
           commit('SET_ROUTERS', res.routers)
           commit('SET_ROUTERS_LIST', res.routerList)
+          commit('SET_PERMISSIONMARK_LIST', res.permissionMarkList)
           commit('SET_ROUTESTATE', false)
           resolve()
         })

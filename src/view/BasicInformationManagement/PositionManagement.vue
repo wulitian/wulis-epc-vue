@@ -31,15 +31,23 @@
     </div>
     <!-- 列表 -->
     <a-spin :spinning="spinning">
-      <a-table :columns="columns" rowKey="id" :data-source="data" :pagination="false">
-      <span slot="action" slot-scope="text, record">
-        <a @click="onToUpdate(record)">修改</a>
-        <a-divider type="vertical" />
-        <a-popconfirm title="你确定删除吗？" ok-text="确定" cancel-text="取消" @confirm="onDeleteConfirm(record)" @cancel="onDeleteCancel">
-          <a href="#">删除</a>
-        </a-popconfirm>
-      </span>
-    </a-table>
+      <a-table :rowClassName="(record, index)=>{return index % 2 === 1? 'odd' : 'even'}" bordered :columns="columns" rowKey="id" :data-source="data" :pagination="false">
+        <span slot="enable" slot-scope="enable">
+           <a-tag color="green" v-if="enable==0">
+             禁用
+          </a-tag>
+          <a-tag color="cyan" v-if="enable==1">
+             启用
+          </a-tag>
+        </span>
+        <span slot="action" slot-scope="text, record">
+          <a @click="onToUpdate(record)">修改</a>
+          <a-divider type="vertical" />
+          <a-popconfirm title="你确定删除吗？" ok-text="确定" cancel-text="取消" @confirm="onDeleteConfirm(record)" @cancel="onDeleteCancel">
+            <a href="#">删除</a>
+          </a-popconfirm>
+        </span>
+      </a-table>
     </a-spin>
     <!-- 分页 -->
     <a-pagination v-if="total>=10" style="float: right;margin-top: 10px" :total="total" :default-current="1" show-size-changer show-quick-jumper @change="onPaginationChange" @showSizeChange="onShowSizeChange"/>
@@ -79,23 +87,10 @@
   import {deletePositionById,insertPosition,queryPositionByid,queryPositionList,queryPositionPage,updatePosition} from "@/api/BasicInformationManagement/PositionManagement";
 
   const columns = [
-    {
-      title: '职位名称',
-      dataIndex: 'positionName',
-    },
-    {
-      title: '创建时间',
-      dataIndex: 'createTime',
-    },
-    {
-      title: '启用状态',
-      dataIndex: 'enable',
-    },
-    {
-      title: '操作',
-      key: 'action',
-      scopedSlots: { customRender: 'action' },
-    },
+    {title: '职位名称', dataIndex: 'positionName',},
+    {title: '创建时间', dataIndex: 'createTime',},
+    {title: '启用状态',dataIndex: 'enable',key: 'enable' ,scopedSlots: { customRender: 'enable' }, },
+    {title: '操作', key: 'action', scopedSlots: { customRender: 'action' },},
   ];
   //头部混入
   const headMixins = {
@@ -152,7 +147,6 @@
         queryPositionPage(Object.assign(this.page,this.headerForm))
           .then(res => {
             if(res.code==2020200){
-              console.log(res.data)
               this.data = res.data.records;
               this.total = res.data.total;
               this.spinning = false;
@@ -325,7 +319,13 @@
   }
 </script>
 
-<style scoped>
+<style scoped >
+  /deep/ .even{
+    background:#ffffff;
+  }
+  /deep/ .odd{
+    background: #fafafa;
+  }
   tr:last-child td {
     padding-bottom: 0;
   }

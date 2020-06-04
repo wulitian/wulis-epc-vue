@@ -31,14 +31,22 @@
     </div>
     <!-- 列表 -->
     <a-spin :spinning="spinning">
-      <a-table :columns="columns" rowKey="id" :data-source="data" :pagination="false">
-      <span slot="action" slot-scope="text, record">
-        <a @click="onToUpdate(record)">修改</a>
-        <a-divider type="vertical" />
-        <a-popconfirm title="你确定删除吗？" ok-text="确定" cancel-text="取消" @confirm="onDeleteConfirm(record)" @cancel="onDeleteCancel">
-          <a href="#">删除</a>
-        </a-popconfirm>
+      <a-table :rowClassName="(record, index)=>{return index % 2 === 1? 'odd' : 'even'}" bordered :columns="columns" rowKey="id" :data-source="data" :pagination="false">
+        <span slot="enable" slot-scope="enable">
+         <a-tag color="green" v-if="enable==0">
+           禁用
+        </a-tag>
+        <a-tag color="cyan" v-if="enable==1">
+           启用
+        </a-tag>
       </span>
+        <span slot="action" slot-scope="text, record">
+          <a @click="onToUpdate(record)">修改</a>
+          <a-divider type="vertical" />
+          <a-popconfirm title="你确定删除吗？" ok-text="确定" cancel-text="取消" @confirm="onDeleteConfirm(record)" @cancel="onDeleteCancel">
+            <a href="#">删除</a>
+          </a-popconfirm>
+        </span>
       </a-table>
     </a-spin>
     <!-- 分页 -->
@@ -94,7 +102,7 @@
     { title: '成本科目',dataIndex: 'name',key: 'name' },
     { title: '大类名称',dataIndex: 'category',key: 'category' },
     { title: '备注',dataIndex: 'remark',key: 'remark' },
-    { title: '启用状态',dataIndex: 'enable',key: 'enable' },
+    {title: '启用状态',dataIndex: 'enable',key: 'enable' ,scopedSlots: { customRender: 'enable' }, },
     { title: '创建时间',dataIndex: 'createTime',key: 'createTime' },
     { title: '操作',dataIndex: 'action', scopedSlots: { customRender: 'action' } },
   ];
@@ -295,7 +303,6 @@
         this.modalState = true;
         this.modalTitle = '修改成本科目';
         this.addStatus = false;
-        console.log(record)
         this.id=record.id;
         this.form={
             name:record.name,
@@ -333,6 +340,12 @@
 </script>
 
 <style scoped>
+  /deep/ .even{
+    background:#ffffff;
+  }
+  /deep/ .odd{
+    background: #fafafa;
+  }
   tr:last-child td {
     padding-bottom: 0;
   }

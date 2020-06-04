@@ -37,7 +37,7 @@
     </div>
     <!-- 列表 -->
     <a-spin :spinning="spinning">
-      <a-table :columns="columns" rowKey="id" :data-source="data" :pagination="false">
+      <a-table :rowClassName="(record, index)=>{return index % 2 === 1? 'odd' : 'even'}" bordered :columns="columns" rowKey="id" :data-source="data" :pagination="false">
       <span slot="action" slot-scope="text, record">
         <a @click="onToUpdate(record)">修改</a>
         <a-divider type="vertical" />
@@ -214,7 +214,7 @@
         </a-row>
         <a-row>
           <a-form-model-item :wrapper-col="{ span: 20, offset: 0 }" :label-col="{ span: 3 }" style="margin-left: -18px" label="已上传文件" >
-            <a-table :columns="uploadColumns" rowKey="id" :data-source="fileRecordList" :pagination="false">
+            <a-table :rowClassName="(record, index)=>{return index % 2 === 1? 'odd' : 'even'}" bordered :columns="uploadColumns" rowKey="id" :data-source="fileRecordList" :pagination="false">
               <span slot="action" slot-scope="text, record">
                   <a href="#" @click="deleteUpload(record)">删除</a>
               </span>
@@ -464,12 +464,10 @@
       //添加
       onAdd(){
         this.$refs.ruleForm.validate(valid => {
-          console.log(this.form)
           if (valid) {
             insertContractInfo(Object.assign(this.form,{fileRecordList:this.fileRecordList}))
               .then(res => {
                 if(res.code==2020200){
-                  console.log(res)
                   this.queryContractInfoPage();
                   this.modalState = false;
                   this.$message.info(res.message);
@@ -492,7 +490,6 @@
             updateContractInfo(Object.assign(this.form,{id:this.id,fileRecordList:this.fileRecordList}))
               .then(res => {
                 if(res.code==2020200){
-                  console.log(res)
                   this.queryContractInfoPage();
                   this.modalState = false;
                   this.$message.info(res.message);
@@ -518,7 +515,6 @@
       //上传前
       beforeUpload(file) {
         this.fileList = [...this.fileList, file];
-        console.log(this.fileList)
         return false;
       },
       //上传
@@ -554,7 +550,6 @@
             i--;
           }
         }
-        console.log(record)
       },
       //添加水印
       transformFile(file) {
@@ -624,7 +619,6 @@
         queryContractInfoPage(Object.assign(this.page,this.headerForm))
           .then(res => {
             if(res.code==2020200){
-              console.log(res)
               this.data = res.data.records;
               this.total = res.data.total;
               this.spinning = false;
@@ -643,8 +637,6 @@
           .then(res => {
             if(res.code==2020200){
               this.ContractCategoryList = res.data;
-              console.log('合同类目')
-              console.log(res)
             }else{
               this.$message.info(res.message);
             }
@@ -694,8 +686,6 @@
         queryContractInfoByid({id:record.id})
           .then(res => {
             if(res.code==2020200){
-              console.log('123123123123123')
-              console.log(res,res)
               this.form = {
                 alertDays:res.data.alertDays,
                 alertType:res.data.alertType,
@@ -730,7 +720,6 @@
           .catch((e) => {
             console.log(e)
           })
-        console.log(record)
       },
       // 删除确认
       onDeleteConfirm (record) {
@@ -761,6 +750,12 @@
 </script>
 
 <style scoped>
+  /deep/ .even{
+    background:#ffffff;
+  }
+  /deep/ .odd{
+    background: #fafafa;
+  }
   tr:last-child td {
     padding-bottom: 0;
   }

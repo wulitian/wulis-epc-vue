@@ -37,14 +37,22 @@
     </div>
     <!-- 列表 -->
     <a-spin :spinning="spinning">
-      <a-table :columns="columns" rowKey="id" :data-source="data" :pagination="false">
-      <span slot="action" slot-scope="text, record">
-        <a @click="onToUpdate(record)">修改</a>
-        <a-divider type="vertical" />
-        <a-popconfirm title="你确定删除吗？" ok-text="确定" cancel-text="取消" @confirm="onDeleteConfirm(record)" @cancel="onDeleteCancel">
-          <a href="#">删除</a>
-        </a-popconfirm>
+      <a-table :rowClassName="(record, index)=>{return index % 2 === 1? 'odd' : 'even'}" bordered :columns="columns" rowKey="id" :data-source="data" :pagination="false">
+        <span slot="enable" slot-scope="enable">
+         <a-tag color="green" v-if="enable==0">
+           禁用
+        </a-tag>
+        <a-tag color="cyan" v-if="enable==1">
+           启用
+        </a-tag>
       </span>
+        <span slot="action" slot-scope="text, record">
+          <a @click="onToUpdate(record)">修改</a>
+          <a-divider type="vertical" />
+          <a-popconfirm title="你确定删除吗？" ok-text="确定" cancel-text="取消" @confirm="onDeleteConfirm(record)" @cancel="onDeleteCancel">
+            <a href="#">删除</a>
+          </a-popconfirm>
+        </span>
       </a-table>
     </a-spin>
     <!-- 分页 -->
@@ -112,27 +120,11 @@
   import {queryMenuTree} from "@/api/SystemPermissionsManagement/MenuManagement";
   const columns = [
     {title: '角色名称',dataIndex: 'roleName',},
-    {
-      title: '权限字符',
-      dataIndex: 'roleMark',
-    },
-    {
-      title: '排序',
-      dataIndex: 'sort',
-    },
-    {
-      title: '创建时间',
-      dataIndex: 'createTime',
-    },
-    {
-      title: '启用状态',
-      dataIndex: 'enable',
-    },
-    {
-      title: '操作',
-      key: 'action',
-      scopedSlots: { customRender: 'action' },
-    },
+    {title: '权限字符', dataIndex: 'roleMark',},
+    {title: '排序', dataIndex: 'sort',},
+    {title: '创建时间', dataIndex: 'createTime',},
+    {title: '启用状态',dataIndex: 'enable',key: 'enable' ,scopedSlots: { customRender: 'enable' }, },
+    {title: '操作', key: 'action', scopedSlots: { customRender: 'action' },},
   ];
   //头部混入
   const headMixins = {
@@ -193,8 +185,6 @@
             if(res.code==2020200){
               this.treeData = res.data;
               this.getTree(this.treeData)
-              console.log('-------------this.treeData--------')
-              console.log(this.treeData)
             }else{
               this.$message.info(res.message);
             }
@@ -209,7 +199,6 @@
         queryRolePage(Object.assign(this.page,this.headerForm))
           .then(res => {
             if(res.code==2020200){
-              console.log(res.data)
               this.data = res.data.records;
               this.total = res.data.total;
               this.spinning = false;
@@ -240,7 +229,6 @@
               this.form.remark = res.data.remark;
               this.form.enable = res.data.enable;
               this.form.menuIds.checked = res.data.menuIds.map(String)
-              console.log( this.form.menuIds)
               this.id = record.id;
             }else{
               this.$message.info(res.message);
@@ -264,7 +252,6 @@
           .catch((e) => {
             console.log(e)
           })
-        console.log(record)
       },
       // 删除取消
       onDeleteCancel (record) {
@@ -352,7 +339,6 @@
             insertRole(params)
               .then(res => {
                 if(res.code==2020200){
-                  console.log(res)
                   this.queryRolePage();
                   this.modalState = false;
                   this.$message.info(res.message);
@@ -381,7 +367,6 @@
         updateRole(params)
           .then(res => {
             if(res.code==2020200){
-              console.log(res)
               this.queryRolePage();
               this.modalState = false;
               this.$message.info(res.message);
@@ -392,7 +377,6 @@
           .catch((e) => {
             console.log(e)
           })
-        console.log(this.form)
       },
       //重置表单
       onResetForm(){
@@ -461,5 +445,11 @@
     line-height: 32px;
     position: absolute;
     left: 0;
+  }
+  /deep/ .even{
+    background:#ffffff;
+  }
+  /deep/ .odd{
+    background: #fafafa;
   }
 </style>

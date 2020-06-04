@@ -28,14 +28,22 @@
       </div>
       <!-- 列表 -->
       <a-spin :spinning="spinning">
-        <a-table :columns="columns"  :data-source="data" rowKey="id"  childrenColumnName="childList" :scroll="{ x: 1500}" :pagination="false" :row-selection="rowSelection" >
-          <span slot="action" slot-scope="text, record">
-        <a @click="onToUpdate(record)">修改</a>
-        <a-divider type="vertical" />
-        <a-popconfirm title="你确定删除吗（如果删除有可能删除拆分的子项目）？" ok-text="确定" cancel-text="取消" @confirm="onDeleteConfirm(record)" @cancel="onDeleteCancel">
-          <a href="#">删除</a>
-        </a-popconfirm>
+        <a-table  bordered :columns="columns"  :data-source="data" rowKey="id"  childrenColumnName="childList" :scroll="{ x: 1500}" :pagination="false" >
+          <span slot="enable" slot-scope="enable">
+         <a-tag color="green" v-if="enable==0">
+           禁用
+        </a-tag>
+        <a-tag color="cyan" v-if="enable==1">
+           启用
+        </a-tag>
       </span>
+          <span slot="action" slot-scope="text, record">
+            <a @click="onToUpdate(record)">修改</a>
+            <a-divider type="vertical" />
+            <a-popconfirm title="你确定删除吗（如果删除有可能删除拆分的子项目）？" ok-text="确定" cancel-text="取消" @confirm="onDeleteConfirm(record)" @cancel="onDeleteCancel">
+              <a href="#">删除</a>
+            </a-popconfirm>
+          </span>
         </a-table>
       </a-spin>
       <!-- 弹窗 -->
@@ -148,7 +156,7 @@
     { title: '责任单位',dataIndex: 'organizationName',key: 'organizationName'},
     { title: '开始时间',dataIndex: 'startTime',key: 'startTime' },
     { title: '结束时间',dataIndex: 'endTime',key: 'endTime'},
-    { title: '启用状态',dataIndex: 'enable',key: 'enable' },
+    {title: '启用状态',dataIndex: 'enable',key: 'enable' ,scopedSlots: { customRender: 'enable' }, },
     { title: '操作', key: 'active', fixed: 'right', scopedSlots: { customRender: 'action' }, width: 140, },
   ];
   const list = [
@@ -163,17 +171,6 @@
       id: '2',
     },
   ];
-  const rowSelection = {
-    onChange: (selectedRowKeys, selectedRows) => {
-      console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
-    },
-    onSelect: (record, selected, selectedRows) => {
-      console.log(record, selected, selectedRows);
-    },
-    onSelectAll: (selected, selectedRows, changeRows) => {
-      console.log(selected, selectedRows, changeRows);
-    },
-  };
   //弹窗混入
   const modalMixins = {
     data () {
@@ -275,8 +272,6 @@
       },
       //修改
       onUpdate(){
-        console.log('Object.assign(this.form,{id:this.id})-------------')
-        console.log(Object.assign(this.form,{id:this.id}))
         updateMenu(Object.assign(this.form,{id:this.id}))
           .then(res => {
             if(res.code==2020200){
@@ -313,7 +308,6 @@
       data:[],
       organizationList:[],
       columns,
-      rowSelection,
     }
   },
   created(){
@@ -341,7 +335,6 @@
       queryOrganizationList()
         .then(res => {
           if(res.code==2020200){
-            console.log(res)
             this.organizationList = res.data;
           }else{
             this.$message.info(res.message);
@@ -373,7 +366,6 @@
       queryFaxmByGcid({id:this.listId})
         .then(res => {
           if(res.code==2020200){
-              console.log(res)
             this.data = res.data;
           }else{
             this.$message.info(res.message);
@@ -527,7 +519,7 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     cursor: pointer;
-    font-size: 16px;
+    font-size: 14px;
     border-bottom: 1px solid #ddd;
     line-height: 38px;
     padding: 0 10px;
@@ -549,7 +541,7 @@
     left: 0;
   }
   .active{
-    background: #1890ff;
+    background: #00b5a4;
     color: #fff;
   }
 </style>

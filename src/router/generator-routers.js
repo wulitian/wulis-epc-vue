@@ -21,7 +21,8 @@ export const generatorDynamicRouter = () => {
   return new Promise((resolve, reject) => {
     getNav().then(res => {
         const { data } = res
-        let newDataAll = []
+        let routerList = [];
+        let permissionMarkList = [];
         for (let i = 0; i < data.length; i++) {
           if(data[i].menuType==0){
             let newData = {}
@@ -32,7 +33,7 @@ export const generatorDynamicRouter = () => {
             newData.id = data[i].id;
             newData.component = data[i].component;
             newData.show = data[i].enable;
-            var meta = {};
+            let meta = {};
             meta.title = data[i].menuName;
             meta.target = data[i].target;
             meta.icon = data[i].icon
@@ -41,19 +42,22 @@ export const generatorDynamicRouter = () => {
             meta.hiddenHeaderContent = data[i].hiddenHeaderContent == '0'?false:true;
             meta.keepAlive = data[i].keepAlive == '0'?false:true;
             newData.meta = meta;
-            newDataAll.push(newData)
+            routerList.push(newData)
+          }else{
+            permissionMarkList.push(data[i])
           }
         }
         const menuNav = []
         const childrenNav = []
         // 后端数据, 根级树数组,  根级 PID
-        listToTree(newDataAll, childrenNav, "0");
+        listToTree(routerList, childrenNav, "0");
         rootRouter.children = childrenNav
         menuNav.push(rootRouter)
         const routers = generator(menuNav)
         let routerAll = {}
         routerAll.routers = routers;
-        routerAll.routerList = newDataAll;
+        routerAll.routerList = routerList;
+        routerAll.permissionMarkList = permissionMarkList;
         resolve(routerAll)
     }).catch(err => {
       // Vue.ls.remove(ACCESS_TOKEN)

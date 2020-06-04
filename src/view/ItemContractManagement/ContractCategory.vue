@@ -31,7 +31,7 @@
     </div>
     <!-- 列表 -->
     <a-spin :spinning="spinning">
-      <a-table :columns="columns" rowKey="id" :data-source="data" :pagination="false">
+      <a-table :rowClassName="(record, index)=>{return index % 2 === 1? 'odd' : 'even'}" bordered :columns="columns" rowKey="id" :data-source="data" :pagination="false">
       <span slot="action" slot-scope="text, record">
         <a @click="onToUpdate(record)">修改</a>
         <a-divider type="vertical" />
@@ -200,7 +200,6 @@
             insertContractCategory(this.form)
               .then(res => {
                 if(res.code==2020200){
-                  console.log(res)
                   this.queryContractCategoryPage();
                   this.modalState = false;
                   this.$message.info(res.message);
@@ -223,7 +222,6 @@
             updateContractCategory(Object.assign(this.form,{id:this.id}))
               .then(res => {
                 if(res.code==2020200){
-                  console.log(res)
                   this.queryContractCategoryPage();
                   this.modalState = false;
                   this.$message.info(res.message);
@@ -268,7 +266,6 @@
         queryContractCategoryPage(Object.assign(this.page,this.headerForm))
           .then(res => {
             if(res.code==2020200){
-              console.log(res)
               this.data = res.data.records;
               this.total = res.data.total;
               this.spinning = false;
@@ -296,7 +293,6 @@
           enable:record.enable
         };
         this.id = record.id;
-        console.log(record)
       },
       // 删除确认
       onDeleteConfirm (record) {
@@ -327,6 +323,12 @@
 </script>
 
 <style scoped>
+  /deep/ .even{
+    background:#ffffff;
+  }
+  /deep/ .odd{
+    background: #fafafa;
+  }
   tr:last-child td {
     padding-bottom: 0;
   }

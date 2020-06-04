@@ -4,7 +4,7 @@ import config from '@/config/defaultSettings'
 
 // base library（基本组件）
 import Antd from 'ant-design-vue'
-import 'ant-design-vue/dist/antd.css'
+import 'ant-design-vue/dist/antd.less'
 /* antV的图表非常漂亮 */
 import Viser from 'viser-vue'
 // 图片剪裁器

@@ -37,14 +37,22 @@
     </div>
     <!-- 列表 -->
     <a-spin :spinning="spinning">
-      <a-table :columns="columns" rowKey="id" :data-source="data" :pagination="false">
-      <span slot="action" slot-scope="text, record">
-        <a @click="onToUpdate(record)">修改</a>
-        <a-divider type="vertical" />
-        <a-popconfirm title="你确定删除吗？" ok-text="确定" cancel-text="取消" @confirm="onDeleteConfirm(record)" @cancel="onDeleteCancel">
-          <a href="#">删除</a>
-        </a-popconfirm>
+      <a-table :rowClassName="(record, index)=>{return index % 2 === 1? 'odd' : 'even'}" bordered :columns="columns" rowKey="id" :data-source="data" :pagination="false">
+        <span slot="enable" slot-scope="enable">
+         <a-tag color="green" v-if="enable==0">
+           禁用
+        </a-tag>
+        <a-tag color="cyan" v-if="enable==1">
+           启用
+        </a-tag>
       </span>
+        <span slot="action" slot-scope="text, record">
+          <a @click="onToUpdate(record)">修改</a>
+          <a-divider type="vertical" />
+          <a-popconfirm title="你确定删除吗？" ok-text="确定" cancel-text="取消" @confirm="onDeleteConfirm(record)" @cancel="onDeleteCancel">
+            <a href="#">删除</a>
+          </a-popconfirm>
+        </span>
       </a-table>
     </a-spin>
     <!-- 分页 -->
@@ -170,7 +178,7 @@
         </a-row>
         <a-row>
           <a-form-model-item :wrapper-col="{ span: 20, offset: 0 }" :label-col="{ span: 3 }" style="margin-left: -18px" label="已上传文件" >
-            <a-table :columns="uploadColumns" rowKey="id" :data-source="fileRecordList" :pagination="false">
+            <a-table :rowClassName="(record, index)=>{return index % 2 === 1? 'odd' : 'even'}" bordered :columns="uploadColumns" rowKey="id" :data-source="fileRecordList" :pagination="false">
               <span slot="action" slot-scope="text, record">
                   <a href="#" @click="deleteUpload(record)">删除</a>
               </span>
@@ -230,7 +238,7 @@
     { title: '承揽方式',dataIndex: 'undertakeName',key: 'undertakeName' },
     { title: '项目类型',dataIndex: 'projectTypeName',key: 'projectTypeName' },
     { title: '描述',dataIndex: 'description',key: 'description' },
-    { title: '启用状态',dataIndex: 'enable',key: 'enable' },
+    { title: '启用状态',dataIndex: 'enable',key: 'enable' ,scopedSlots: { customRender: 'enable' }, },
     { title: '创建时间',dataIndex: 'createTime',key: 'createTime' },
     { title: '操作',dataIndex: 'action', scopedSlots: { customRender: 'action' } },
   ];
@@ -357,12 +365,10 @@
       //添加
       onAdd(){
         this.$refs.ruleForm.validate(valid => {
-          console.log(this.form)
           if (valid) {
             insertEngineeringManage(Object.assign(this.form,{fileRecordList:this.fileRecordList}))
               .then(res => {
                 if(res.code==2020200){
-                  console.log(res)
                   this.queryEngineeringManagePage();
                   this.modalState = false;
                   this.$message.info(res.message);
@@ -385,7 +391,6 @@
             updateEngineeringManage(Object.assign(this.form,{id:this.id,fileRecordList:this.fileRecordList}))
               .then(res => {
                 if(res.code==2020200){
-                  console.log(res)
                   this.queryEngineeringManagePage();
                   this.modalState = false;
                   this.$message.info(res.message);
@@ -411,7 +416,6 @@
       //上传前
       beforeUpload(file) {
         this.fileList = [...this.fileList, file];
-        console.log(this.fileList)
         return false;
       },
       //上传
@@ -447,7 +451,6 @@
             i--;
           }
         }
-        console.log(record)
       },
       //添加水印
       transformFile(file) {
@@ -509,7 +512,6 @@
         queryEngineeringManagePage(Object.assign(this.page,this.headerForm))
           .then(res => {
             if(res.code==2020200){
-              console.log(res.data)
               this.data = res.data.records;
               this.total = res.data.total;
               this.spinning = false;
@@ -604,7 +606,6 @@
         queryEngineeringManageByid({id:record.id})
           .then(res => {
             if(res.code==2020200){
-              console.log(res,res)
               this.form = {
                 address:res.data.address,
                 attachmentUrl:res.data.attachmentUrl,
@@ -658,6 +659,12 @@
 </script>
 
 <style scoped>
+  /deep/ .even{
+    background:#ffffff;
+  }
+  /deep/ .odd{
+    background: #fafafa;
+  }
   tr:last-child td {
     padding-bottom: 0;
   }

@@ -65,7 +65,16 @@ exports.cssLoaders = function (options) {
   return {
     css: generateLoaders(),
     postcss: generateLoaders(),
-    less: generateLoaders('less'),
+    // less: generateLoaders('less'),
+    less: generateLoaders('less', {
+      modifyVars: {
+        // 这三个地方都设置成你需要的主题色
+        'primary-color': '#00b5a4',
+        'link-color': '#00b5a4',
+        'border-radius-base': '2px',
+      },
+      javascriptEnabled: true,
+    }),
     sass: generateLoaders('sass', { indentedSyntax: true }),
     scss: generateLoaders('sass'),
     stylus: generateLoaders('stylus'),

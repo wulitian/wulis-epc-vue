@@ -69,17 +69,23 @@
     </div>
     <!-- 列表 -->
     <a-spin :spinning="spinning">
-      <a-table :columns="columns" rowKey="id" :data-source="data" :pagination="false">
-      <span slot="action" slot-scope="text, record">
-        <a @click="onView(record)">查看</a>
-        <a-divider type="vertical" />
-        <a @click="onToUpdate(record)">修改</a>
-        <a-divider type="vertical" />
-        <a-popconfirm title="你确定删除吗？" ok-text="确定" cancel-text="取消" @confirm="onDeleteConfirm(record)" @cancel="onDeleteCancel">
-          <a href="#">删除</a>
-        </a-popconfirm>
+      <a-table :rowClassName="(record, index)=>{return index % 2 === 1? 'odd' : 'even'}" bordered :columns="columns" rowKey="id" :data-source="data" :pagination="false">
+        <span slot="enable" slot-scope="enable">
+         <a-tag color="green" v-if="enable==0">
+           禁用
+        </a-tag>
+        <a-tag color="cyan" v-if="enable==1">
+           启用
+        </a-tag>
       </span>
-    </a-table>
+        <span slot="action" slot-scope="text, record">
+          <a @click="onToUpdate(record)">修改</a>
+          <a-divider type="vertical" />
+          <a-popconfirm title="你确定删除吗？" ok-text="确定" cancel-text="取消" @confirm="onDeleteConfirm(record)" @cancel="onDeleteCancel">
+            <a href="#">删除</a>
+          </a-popconfirm>
+        </span>
+      </a-table>
     </a-spin>
     <!-- 分页 -->
     <a-pagination v-if="total>=10" style="float: right;margin-top: 10px" :total="total" :default-current="1" show-size-changer show-quick-jumper @change="onPaginationChange" @showSizeChange="onShowSizeChange"/>
@@ -104,14 +110,9 @@
                 <a-input v-model="form.userName" placeholder="请输入用户名称"/>
               </a-form-model-item>
           </a-col>
-          <a-col :span="12">
-              <a-form-model-item label="密码" prop="password">
+          <a-col :span="12" v-if="passwordState">
+              <a-form-model-item label="密码" prop="password" >
                 <a-input v-model="form.password" placeholder="请输入密码"/>
-              </a-form-model-item>
-          </a-col>
-          <a-col :span="12">
-              <a-form-model-item label="确认密码" prop="password2">
-                <a-input v-model="form.password2" placeholder="请输入密码"/>
               </a-form-model-item>
           </a-col>
           <a-col :span="12">
@@ -178,20 +179,20 @@
               </a-form-model-item>
           </a-col>
           <a-col :span="12">
-              <a-form-model-item label="备注" prop="remark">
-                <a-textarea placeholder="请输入备注" :rows="4" v-model="form.remark"/>
-              </a-form-model-item>
+            <a-form-model-item label="启用状态" prop="enable">
+              <a-radio-group v-model="form.enable">
+                <a-radio :value="0">
+                  否
+                </a-radio>
+                <a-radio :value="1">
+                  是
+                </a-radio>
+              </a-radio-group>
+            </a-form-model-item>
           </a-col>
           <a-col :span="12">
-              <a-form-model-item label="启用状态" prop="enable">
-                <a-radio-group v-model="form.enable">
-                  <a-radio :value="0">
-                    否
-                  </a-radio>
-                  <a-radio :value="1">
-                    是
-                  </a-radio>
-                </a-radio-group>
+              <a-form-model-item label="备注" prop="remark">
+                <a-textarea placeholder="请输入备注" :rows="4" v-model="form.remark"/>
               </a-form-model-item>
           </a-col>
           <a-col :span="24">
@@ -234,7 +235,7 @@
     {title: '所属部门', dataIndex: 'departmentName',},
     {title: '职位', dataIndex: 'positionName',},
     {title: '创建时间', dataIndex: 'createTime',},
-    {title: '启用状态', dataIndex: 'enable',},
+    {title: '启用状态',dataIndex: 'enable',key: 'enable' ,scopedSlots: { customRender: 'enable' }, },
     {title: '操作', key: 'action', scopedSlots: { customRender: 'action' },},
   ];
   const data = [
@@ -289,11 +290,11 @@
         this.modalTitle='新建用户';
         this.addStatus = true;
         this.modalState = true;
+        this.passwordState = true;
         this.form={
           account:'',
           userName:'',
           password:'',
-          password2:'',
           phoneNumber:'',
           mail:'',
           sex:0,
@@ -304,6 +305,7 @@
           remark:'',
           enable:1,
         }
+        this.rules = this.rulesAdd;
       }
     }
   };
@@ -336,8 +338,6 @@
         queryOrganizationList()
           .then(res => {
             if(res.code==2020200){
-              console.log("-------------")
-              console.log(res);
               this.organizationList = res.data;
             }else{
               this.$message.info(res.message);
@@ -354,8 +354,6 @@
             if(res.code==2020200){
               this.departmentTree = res.data;
               this.getTree(this.departmentTree);
-              console.log("-------------")
-              console.log(res)
             }else{
               this.$message.info(res.message);
             }
@@ -370,8 +368,6 @@
           .then(res => {
             if(res.code==2020200){
               this.positionList = res.data;
-              console.log("-------------")
-              console.log(res)
             }else{
               this.$message.info(res.message);
             }
@@ -385,8 +381,6 @@
         queryRoleList()
           .then(res => {
             if(res.code==2020200){
-              console.log("-------------")
-              console.log(res.data)
               this.roleList = res.data;
             }else{
               this.$message.info(res.message);
@@ -399,8 +393,6 @@
       //查询用户列表
       queryUserPage(){
         this.spinning = true;
-        console.log('-----Object.assign(this.page,this.headerForm)---')
-        console.log(Object.assign(this.page,this.headerForm))
         queryUserPage(Object.assign(this.page,this.headerForm))
           .then(res => {
             if(res.code==2020200){
@@ -425,6 +417,8 @@
         this.modalState = true;
         this.modalTitle = '修改用户';
         this.addStatus = false;
+        this.rules = this.rulesUpdate;
+        this.passwordState = false;
         queryUserByid({id:record.id})
           .then(res => {
             if(res.code==2020200){
@@ -440,7 +434,6 @@
                 this.form.remark= res.data.remark;
                 this.form.enable= res.data.enable;
                 this.id = res.data.id;
-                console.log(res.data)
             }else{
               this.$message.info(res.message);
             }
@@ -448,7 +441,6 @@
           .catch((e) => {
             console.log(e)
           })
-        console.log(record)
       },
       // 删除确认
       onDeleteConfirm (record) {
@@ -516,11 +508,11 @@
         wrapperCol: { span: 16 },
         addStatus:true,
         id:'',
+        passwordState:true,
         form:{
           account:'',
           userName:'',
           password:'',
-          password2:'',
           phoneNumber:'',
           mail:'',
           sex: 0,
@@ -531,11 +523,21 @@
           remark:'',
           enable:1,
         },
-        rules: {
+        rules:[],
+        rulesUpdate: {
+          account: [{ required: true, message: '请输入账号', trigger: 'blur' },{ min: 6, max: 12, message: '账号长度在6至12位', trigger: 'blur' }],
+          userName: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
+          phoneNumber: [{ required: true, message: '请输入电话号', trigger: 'blur' },{validator: this.phoneNumberCheck}],
+          mail: [{type: 'email',required: true,message: '请填写正确的邮箱',trigger: 'blur',}],
+          organizationId: [{required: true,message: '请选择所属企业',trigger: 'change',}],
+          departmentId: [{required: true,message: '请选择所属部门',trigger: 'change',}],
+          positionId: [{required: true,message: '请选择职位',trigger: 'change',}],
+          roleIds: [{type: 'array',required: true,message: '请配置角色',trigger: 'change',}]
+        },
+        rulesAdd: {
           account: [{ required: true, message: '请输入账号', trigger: 'blur' },{ min: 6, max: 12, message: '账号长度在6至12位', trigger: 'blur' }],
           userName: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
           password: [{ required: true, message: '请输入密码', trigger: 'blur' },{ min: 6, max: 20, message: '账号长度在6至20位', trigger: 'blur' }],
-          password2: [{ required: true, message: '请输入密码', trigger: 'blur' },{ min: 6, max: 20, message: '账号长度在6至20位', trigger: 'blur' },{validator: this.compareToFirstPassword}],
           phoneNumber: [{ required: true, message: '请输入电话号', trigger: 'blur' },{validator: this.phoneNumberCheck}],
           mail: [{type: 'email',required: true,message: '请填写正确的邮箱',trigger: 'blur',}],
           organizationId: [{required: true,message: '请选择所属企业',trigger: 'change',}],
@@ -570,11 +572,9 @@
       onAdd(){
         this.$refs.ruleForm.validate(valid => {
           if (valid) {
-            console.log(this.form)
             insertUser(this.form)
               .then(res => {
                 if(res.code==2020200){
-                  console.log(res)
                   this.queryUserPage();
                   this.modalState = false;
                   this.$message.info(res.message);
@@ -601,9 +601,6 @@
                 }else{
                   this.$message.info(res.message);
                 }
-              })
-              .catch((e) => {
-                console.log(e)
               })
               .catch((e) => {
                 console.log(e)
@@ -648,6 +645,12 @@
 </script>
 
 <style scoped>
+  /deep/ .even{
+    background:#ffffff;
+  }
+  /deep/ .odd{
+    background: #fafafa;
+  }
   tr:last-child td {
     padding-bottom: 0;
   }

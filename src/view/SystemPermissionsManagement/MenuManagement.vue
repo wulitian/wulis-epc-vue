@@ -31,7 +31,7 @@
     </div>
     <!-- 列表 -->
     <a-spin :spinning="spinning">
-      <a-table :columns="columns"  :data-source="data" rowKey="id"  childrenColumnName="nodes" :scroll="{ x: 1500}" :pagination="false" :row-selection="rowSelection" >
+      <a-table bordered :columns="columns"  :data-source="data" rowKey="id"  childrenColumnName="nodes" :scroll="{ x: 1500}" :pagination="false"  >
       <span slot="menuType" slot-scope="menuType">
          <a-tag color="pink" v-if="menuType==0">
            菜单
@@ -929,17 +929,6 @@
     'icon-right_up',
     'icon-reuse',
   ]
-  const rowSelection = {
-    onChange: (selectedRowKeys, selectedRows) => {
-      console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
-    },
-    onSelect: (record, selected, selectedRows) => {
-      console.log(record, selected, selectedRows);
-    },
-    onSelectAll: (selected, selectedRows, changeRows) => {
-      console.log(selected, selectedRows, changeRows);
-    },
-  };
   //头部混入
   const headMixins = {
     data () {
@@ -987,7 +976,6 @@
         columns,
         data:[],
         menuData:[],
-        rowSelection
       }
     },
     created () {
@@ -1051,7 +1039,6 @@
         this.form.permissionMark=record.permissionMark;
         this.form.enable=record.enable;
         this.id=record.id;
-        console.log(record)
       },
       // 删除确认
       onDeleteConfirm (record) {
@@ -1160,6 +1147,7 @@
                 .then(res => {
                   if(res.code==2020200){
                     this.queryMenuTree();
+                    this.queryMenuSelectTree();
                     this.modalState = false;
                     this.$message.info(res.message);
                   }else{
@@ -1176,8 +1164,6 @@
       },
       //修改
       onUpdate(){
-        console.log('Object.assign(this.form,{id:this.id})-------------')
-        console.log(Object.assign(this.form,{id:this.id}))
         updateMenu(Object.assign(this.form,{id:this.id}))
           .then(res => {
             if(res.code==2020200){

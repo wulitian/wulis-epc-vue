@@ -1,9 +1,9 @@
 <template>
-  <a-locale-provider :locale="zh_CN">
+  <a-config-provider :locale="zh_CN">
     <div id="app">
       <router-view/>
     </div>
-  </a-locale-provider>
+  </a-config-provider>
 </template>
 
 <script>
@@ -29,6 +29,7 @@ export default {
     height: 64px;
     padding: 0px!important;
     line-height: 64px;
-    background: #0f00f3!important;
+    /*background: #0f00f3!important;*/
+    background: #00b5a4!important
   }
 </style>
