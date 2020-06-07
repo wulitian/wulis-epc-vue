@@ -6,7 +6,7 @@ import qs from 'qs'
  */
 export const deletePositionById = (data) => {
   return axios({
-    url: '/web/basic/position/deletePosition',
+    url: '/web/bim/position/deletePosition',
     method: 'delete',
     data:data
   })
@@ -16,7 +16,7 @@ export const deletePositionById = (data) => {
  */
 export const insertPosition = (data) => {
   return axios({
-    url: '/web/basic/position/insertPosition',
+    url: '/web/bim/position/insertPosition',
     method: 'post',
     data:data
   })
@@ -26,7 +26,7 @@ export const insertPosition = (data) => {
  */
 export const queryPositionByid = (data) => {
   return axios({
-    url: '/web/basic/position/queryPosition?'+qs.stringify(data),
+    url: '/web/bim/position/queryPosition?'+qs.stringify(data),
     method: 'get',
   })
 }
@@ -35,7 +35,7 @@ export const queryPositionByid = (data) => {
  */
 export const queryPositionList = () => {
   return axios({
-    url: '/web/basic/position/queryPositionList',
+    url: '/web/bim/position/queryPositionList',
     method: 'get',
   })
 }
@@ -44,7 +44,7 @@ export const queryPositionList = () => {
  */
 export const queryPositionPage = (data) => {
   return axios({
-    url: '/web/basic/position/queryPositionPage?'+qs.stringify(data),
+    url: '/web/bim/position/queryPositionPage?'+qs.stringify(data),
     method: 'get',
   })
 }
@@ -53,7 +53,7 @@ export const queryPositionPage = (data) => {
  */
 export const updatePosition = (data) => {
   return axios({
-    url: '/web/basic/position/updatePosition',
+    url: '/web/bim/position/updatePosition',
     data:data,
     method: 'put',
   })

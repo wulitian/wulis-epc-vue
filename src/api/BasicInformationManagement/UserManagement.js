@@ -6,7 +6,7 @@ import qs from 'qs'
  */
 export const deleteUserById = (data) => {
   return axios({
-    url: '/web/basic/user/info/deleteUser',
+    url: '/web/bim/user/info/deleteUser',
     method: 'delete',
     data:data
   })
@@ -16,7 +16,7 @@ export const deleteUserById = (data) => {
  */
 export const insertUser = (data) => {
   return axios({
-    url: '/web/basic/user/info/insertUser',
+    url: '/web/bim/user/info/insertUser',
     method: 'post',
     data:data
   })
@@ -26,7 +26,7 @@ export const insertUser = (data) => {
  */
 export const queryUserByid = (data) => {
   return axios({
-    url: '/web/basic/user/info/queryUser?'+qs.stringify(data),
+    url: '/web/bim/user/info/queryUser?'+qs.stringify(data),
     method: 'get',
   })
 }
@@ -35,7 +35,7 @@ export const queryUserByid = (data) => {
  */
 export const queryUserListByOfficeId = (data) => {
   return axios({
-    url: '/web/basic/user/info/queryUserList?'+qs.stringify(data),
+    url: '/web/bim/user/info/queryUserList?'+qs.stringify(data),
     method: 'get',
   })
 }
@@ -44,7 +44,7 @@ export const queryUserListByOfficeId = (data) => {
  */
 export const queryUserPage = (data) => {
   return axios({
-    url: '/web/basic/user/info/queryUserPage?'+qs.stringify(data),
+    url: '/web/bim/user/info/queryUserPage?'+qs.stringify(data),
     method: 'get',
   })
 }
@@ -53,7 +53,7 @@ export const queryUserPage = (data) => {
  */
 export const updateUser = (data) => {
   return axios({
-    url: '/web/basic/user/info/updateUser',
+    url: '/web/bim/user/info/updateUser',
     method: 'put',
     data:data
   })

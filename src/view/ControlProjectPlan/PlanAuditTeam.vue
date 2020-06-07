@@ -5,13 +5,13 @@
       <a-col class="gutter-row" :span="4">
         <div class="gutter-box">
           <label>审核组编号:</label>
-          <a-input placeholder="工程类型" v-model="headerForm.shzbh"/>
+          <a-input placeholder="工程类型" v-model="headerForm.teamNumber"/>
         </div>
       </a-col>
       <a-col class="gutter-row" :span="4">
         <div class="gutter-box">
           <label>审核组名称:</label>
-          <a-input placeholder="工程类型" v-model="headerForm.shzmc"/>
+          <a-input placeholder="工程类型" v-model="headerForm.teamName"/>
         </div>
       </a-col>
       <a-col class="gutter-row" :span="4">
@@ -39,8 +39,6 @@
     <a-spin :spinning="spinning">
       <a-table :rowClassName="(record, index)=>{return index % 2 === 1? 'odd' : 'even'}" bordered :columns="columns" rowKey="id" :data-source="data" :pagination="false">
       <span slot="action" slot-scope="text, record">
-        <a @click="onView(record)">查看</a>
-        <a-divider type="vertical" />
         <a @click="onToUpdate(record)">修改</a>
         <a-divider type="vertical" />
         <a-popconfirm title="你确定删除吗？" ok-text="确定" cancel-text="取消" @confirm="onDeleteConfirm(record)" @cancel="onDeleteCancel">
@@ -55,29 +53,14 @@
 </template>
 
 <script>
+  import {deleteReviewTeamById,insertReviewTeam,queryReviewTeamByid,queryReviewTeamList,queryReviewTeamPage,updateReviewTeam} from "@/api/ControlProjectPlan/PlanAuditTeam";
 
   const columns = [
-    { title: '审核组编号',dataIndex: 'shzbh',key: 'shzbh' },
-    { title: '审核组名称',dataIndex: 'shzmc',key: 'shzmc' },
+    { title: '审核组编号',dataIndex: 'teamNumber',key: 'teamNumber' },
+    { title: '审核组名称',dataIndex: 'teamName',key: 'teamName' },
     { title: '启用状态',dataIndex: 'enable',key: 'enable' },
-    { title: '包含人数',dataIndex: 'bhrs',key: 'bhrs' },
+    // { title: '包含人数',dataIndex: 'bhrs',key: 'bhrs' },
     { title: '操作',dataIndex: 'action', scopedSlots: { customRender: 'action' } },
-  ];
-  const data = [
-    {
-      id: '1',
-      shzbh: '公建',
-      shzmc: '无',
-      enable: '启用',
-      bhrs: '2020-10-10',
-    },
-    {
-      id: '2',
-      shzbh: '公建',
-      shzmc: '无',
-      enable: '启用',
-      bhrs: '2020-10-10',
-    },
   ];
   //分页混入
   const paginationMixins = {
@@ -108,8 +91,8 @@
     data () {
       return {
         headerForm:{
-          shzbh:'',
-          shzmc:'',
+          teamNumber:'',
+          teamName:'',
           enable:''
         }
       }
@@ -117,9 +100,11 @@
     methods: {
       // 搜索
       onSearch () {
+        this.queryReviewTeamList();
       },
       // 去添加
       onToAdd () {
+        this.$router.push("/main/ControlProjectPlan/PlanAuditTeamAdd")
       }
     }
   };
@@ -133,22 +118,53 @@
           pageSize:10
         },
         columns,
-        data,
+        data:[]
       }
     },
     created () {
+      this.queryReviewTeamList();
     },
     methods: {
+      //查询部门树
+      queryReviewTeamList(){
+        this.spinning = true;
+        queryReviewTeamList(Object.assign(this.page,this.headerForm))
+          .then(res => {
+            if(res.code==2020200){
+              console.log(res)
+              this.data = res.data;
+              this.spinning = false;
+            }else{
+              this.$message.info(res.message);
+              this.spinning = false;
+            }
+          })
+          .catch((e) => {
+            console.log(e)
+          })
+      },
       // 查看
       onView (record) {
         console.log(record)
       },
       // 修改
       onToUpdate (record) {
+        this.$router.push("/main/ControlProjectPlan/PlanAuditTeamAdd")
       },
       // 删除确认
       onDeleteConfirm (record) {
-        console.log(record)
+        deleteReviewTeamById({id:record.id})
+          .then(res => {
+            if(res.code==2020200){
+              this.queryReviewTeamList();
+              this.$message.info(res.message);
+            }else{
+              this.$message.info(res.message);
+            }
+          })
+          .catch((e) => {
+            console.log(e)
+          })
       },
       // 删除取消
       onDeleteCancel (record) {

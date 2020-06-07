@@ -2,7 +2,7 @@
   <div class="container">
     <div class="login-form-group">
       <div class="left-group"></div>
-      <div class="bt"><img src="../../static/images/logo.png"><span>沂水县供电公司电力工程项目管理平台</span></div>
+      <div class="bt"><img src="../../static/images/logo2.png"><span>沂水县供电公司电力工程项目管理平台</span></div>
       <div class="form-group">
         <img src="../../static/images/loginuser.png"/>
         <input type="text" placeholder="请输入账号" v-model="form.account"/>
@@ -25,6 +25,7 @@
   name: 'Login',
   data () {
     return {
+      spinning:false,
       form:{
         account:'administrator',
         password:'123456',
@@ -37,11 +38,12 @@
   methods:{
     ...mapActions(['GetUserInfo', 'Login']),
     gotoToken(){
+      this.spinning = true;
       Vue.ls.remove(ACCESS_TOKEN);
       this.Login(this.form)
         .then((res) => {
           if(res.code==2020200){
-            this.$message.info(res.message);
+            this.spinning = false;
             this.$router.push("/")
           }else{
             this.$message.info(res.message);
@@ -61,40 +63,41 @@
   }
   .container{
     background: url("../../static/images/pcbg.png")center center no-repeat;
-    background-color: #eff7ff;
+    background-color: #00b5a4;
     height: 100%;
     width: 100%;
     position: fixed;
   }
     .bt{
       font-size: 18px;
-      color: #2979ff;
+      color: #00b5a4;
       font-weight: 700;
       margin-bottom: 20px;
     }
     .login-form-group{
       text-align: center;
-      width: 780px;
-      height: 400px;
+      width: 900px;
+      height: 460px;
       margin: 200px auto 0 auto;
-      padding-left: 390px;
+      padding-left: 470px;
       padding-right: 20px;
       padding-top: 30px;
       position: relative;
-      background: #e9f2ff;
+      background: #e7f9f3;
       border-radius: 10px;
-      box-shadow: 0px 0px 30px #deeaff;
+      -webkit-box-shadow: 0px 0px 30px #b3e2d3;
+      box-shadow: 0px 0px 30px #b3e2d3;
   }
   .left-group{
     background: url('../../static/images/pcleftbg.png')center center no-repeat;
     position: absolute;
     left: 0;
     top: 0;
-    width: 370px;
-    height: 400px;
-    background-size: 80%;
-    background-color: #3583ff;
-    border-radius: 10px 0px 0px 10px
+    width: 450px;
+    height: 459px;
+    background-size: 70%;
+    background-color: #00b5a4;
+    border-radius: 10px 0px 0px 10px;
   }
   .form-group{
     width: 100%;
@@ -122,7 +125,7 @@
     border: 0;
     outline: none;
     color: #FFFFFF;
-    background: #3583ff;
+    background: #00b5a4;
     margin-top: 30px;
   }
 </style>

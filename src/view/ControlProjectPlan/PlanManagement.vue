@@ -28,7 +28,7 @@
       </a-col>
       <span style="margin-left: 10px">
         <a-button type="primary" @click="onSearch">查询</a-button>
-        <a-button type="primary" @click="onToAdd">新增</a-button>
+        <a-button type="primary" @click="onToAdd" v-if="hasPermission('xmjhkz::add')">新增</a-button>
       </span>
     </div>
     <!-- 列表 -->
@@ -36,10 +36,10 @@
       <a-table :rowClassName="(record, index)=>{return index % 2 === 1? 'odd' : 'even'}" bordered :columns="columns" rowKey="id" :data-source="data" :pagination="false">
       <span slot="action" slot-scope="text, record">
         <a @click="onView(record)">查看</a>
-        <a-divider type="vertical" />
-        <a @click="onToUpdate(record)">修改</a>
-        <a-divider type="vertical" />
-        <a-popconfirm title="你确定删除吗？" ok-text="确定" cancel-text="取消" @confirm="onDeleteConfirm(record)" @cancel="onDeleteCancel">
+        <a-divider type="vertical" v-if="hasPermission('xmjhkz::add')"/>
+        <a @click="onToUpdate(record)" v-if="hasPermission('xmjhkz::update')">修改</a>
+        <a-divider type="vertical" v-if="hasPermission('xmjhkz::update')"/>
+        <a-popconfirm title="你确定删除吗？" ok-text="确定" cancel-text="取消" v-if="hasPermission('xmjhkz::delete')" @confirm="onDeleteConfirm(record)" @cancel="onDeleteCancel">
           <a href="#">删除</a>
         </a-popconfirm>
       </span>
@@ -107,17 +107,17 @@
   const data = [
     {
       id: '1',
-      jhbh: '123',
-      jhmc: '关于建设市中心的计划',
-      xmmc: '项目1',
-      enable: '已结束',
+      jhbh: 'LA-202006121',
+      jhmc: '沂水县人民医院一期工程电力系统建设',
+      xmmc: '沂水县人民医院一期工程',
+      enable: '进行中',
       nf: '2020',
     },
     {
-      id: '2',
+      id: 'LA-202006123',
       jhbh: '123',
-      jhmc: '关于建设市中心的计划',
-      xmmc: '项目1',
+      jhmc: '沂水县人民医院一期工程电力系统建设2',
+      xmmc: '沂水县人民医院一期工程',
       enable: '已结束',
       nf: '2020',
     },
@@ -286,6 +286,7 @@
     methods: {
       // 查看
       onView (record) {
+        this.$router.push('/main/ControlProjectPlan/PlanDetails')
         console.log(record)
       },
       // 修改

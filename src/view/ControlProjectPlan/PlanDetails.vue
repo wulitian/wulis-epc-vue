@@ -1,12 +1,12 @@
 <template>
   <div>
     <!--tabs-->
-    <a-tabs type="card" @change="tabChange">
-      <a-tab-pane key="1" tab="济南市医院">
-      </a-tab-pane>
-      <a-tab-pane key="2" tab="文化广场">
-      </a-tab-pane>
-    </a-tabs>
+    <!--<a-tabs type="card" @change="tabChange">-->
+      <!--<a-tab-pane key="1" tab="济南市医院">-->
+      <!--</a-tab-pane>-->
+      <!--<a-tab-pane key="2" tab="文化广场">-->
+      <!--</a-tab-pane>-->
+    <!--</a-tabs>-->
     <!--header-->
     <a-page-header
       style="border: 1px solid rgb(235, 237, 240)"
@@ -15,13 +15,19 @@
       @back="() => $router.go(-1)"
     >
       <template slot="extra">
-        <a-button key="3">
+        <a-button key="1" v-if="hasPermission('xmjhkz::kssg')">
           开始施工
         </a-button>
-        <a-button key="2">
+        <a-button key="2" v-if="hasPermission('xmjhkz::zqsg')">
+          中期施工
+        </a-button>
+        <a-button key="3" type="primary" v-if="hasPermission('xmjhkz::jsjg')">
           结束竣工
         </a-button>
-        <a-button key="1" type="primary">
+        <a-button key="4" type="primary" v-if="hasPermission('xmjhkz;;jhxq::bh')">
+          驳回
+        </a-button>
+        <a-button key="5" type="primary" v-if="hasPermission('xmjhkz;;jhxq::ty')">
           同意
         </a-button>
       </template>
@@ -69,8 +75,8 @@
       </a-col>
       <span style="margin-left: 10px">
         <a-button type="primary" @click="onSearch">查询</a-button>
-        <a-button type="primary" @click="onToAddHt">新增合同</a-button>
-        <a-button type="primary" @click="onToAddBg">新增报告</a-button>
+        <a-button type="primary" @click="onToAddHt" v-if="hasPermission('xmjhkz::xzht')">新增合同</a-button>
+        <a-button type="primary" @click="onToAddBg" v-if="hasPermission('xmjhkz::xzbg')">新增报告</a-button>
       </span>
     </div>
     <!-- 列表 -->
@@ -365,17 +371,17 @@
   const data = [
     {
       id: '1',
-      rwmc: '工程分包',
+      rwmc: '电缆铺线材料合同',
       fqr: '张三',
       kssj: '2020-10-20',
-      enable: '审计单位审核中',
+      enable: '中介审核',
     },
     {
       id: '2',
-      rwmc: '工程分包',
-      fqr: '张三',
+      rwmc: '配电设配AD-768购买合同',
+      fqr: '李四',
       kssj: '2020-10-20',
-      enable: '审计单位审核中',
+      enable: '项目审计',
     },
   ];
   //头部混入
@@ -579,6 +585,7 @@
       // 查看
       onView (record) {
         console.log(record)
+        this.$router.push('/main/ControlProjectPlan/PlanApprove')
       },
       // 修改
       onToUpdate (record) {

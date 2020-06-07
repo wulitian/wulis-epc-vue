@@ -110,7 +110,7 @@
                 <a-input v-model="form.userName" placeholder="请输入用户名称"/>
               </a-form-model-item>
           </a-col>
-          <a-col :span="12" v-if="passwordState">
+          <a-col :span="12">
               <a-form-model-item label="密码" prop="password" >
                 <a-input v-model="form.password" placeholder="请输入密码"/>
               </a-form-model-item>

@@ -183,6 +183,7 @@
         queryMenuTree()
           .then(res => {
             if(res.code==2020200){
+              console.log(res)
               this.treeData = res.data;
               this.getTree(this.treeData)
             }else{
@@ -412,7 +413,6 @@
     methods:{
       getTree(data) {
         for(let i = 0; i < data.length; i++) {
-          if(data[i].menuType==0){
             data[i].title = data[i].menuName;
             data[i].value = data[i].id;
             data[i].key = data[i].id;
@@ -420,9 +420,6 @@
               data[i].children = data[i].nodes;
               this.getTree(data[i].nodes)
             }
-          }else{
-            delete data[i];
-          }
         }
       }
     }

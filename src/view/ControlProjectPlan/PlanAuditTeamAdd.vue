@@ -1,22 +1,35 @@
 <template>
   <div>
     <a-card title="组信息设置" >
-      <a-col class="gutter-row" :span="4">
+      <a-col class="gutter-row" :span="6">
         <div class="gutter-box">
           <label>审核组编号:</label>
           <a-input v-model="cardForm.shzbh"/>
         </div>
       </a-col>
-      <a-col class="gutter-row" :span="4">
+      <a-col class="gutter-row" :span="6">
         <div class="gutter-box">
           <label>审核组名称:</label>
           <a-input v-model="cardForm.shzmc"/>
         </div>
       </a-col>
-      <a-col class="gutter-row" :span="4">
+      <a-col class="gutter-row" :span="6">
         <div class="gutter-box">
           <label>备注:</label>
           <a-input v-model="cardForm.bz"/>
+        </div>
+      </a-col>
+      <a-col class="gutter-row" :span="6">
+        <div class="gutter-box">
+          <label>启用状态:</label>
+            <a-radio-group v-model="form.enable">
+              <a-radio :value="0">
+                否
+              </a-radio>
+              <a-radio :value="1">
+                是
+              </a-radio>
+            </a-radio-group>
         </div>
       </a-col>
     </a-card>
@@ -56,11 +69,7 @@
       <a-spin :spinning="spinning">
         <a-table :rowClassName="(record, index)=>{return index % 2 === 1? 'odd' : 'even'}" bordered :columns="columns" rowKey="id" :data-source="data" :pagination="false">
         <span slot="action" slot-scope="text, record">
-          <a @click="onView(record)">查看</a>
-          <a-divider type="vertical" />
           <a @click="onToUpdate(record)">修改</a>
-          <a-divider type="vertical" />
-          <a @click="onToAdd(record)">新增</a>
         </span>
         </a-table>
       </a-spin>
@@ -73,13 +82,13 @@
       <div style="position: relative;padding-left: 300px;height: 500px">
         <div style="height: 100%;width: 260px;position: absolute;left: 0;top: 0;border: 1px solid #dddddd;overflow-y: auto;">
           <a-directory-tree multiple default-expand-all @select="onSelect" @expand="onExpand">
-            <a-tree-node key="0-0" title="parent 0">
-              <a-tree-node key="0-0-0" title="leaf 0-0" is-leaf />
-              <a-tree-node key="0-0-1" title="leaf 0-1" is-leaf />
+            <a-tree-node key="0-0" title="承建单位">
+              <a-tree-node key="0-0-0" title="承建单位1" is-leaf />
+              <a-tree-node key="0-0-1" title="承建单位2" is-leaf />
             </a-tree-node>
-            <a-tree-node key="0-1" title="parent 1">
-              <a-tree-node key="0-1-0" title="leaf 1-0" is-leaf />
-              <a-tree-node key="0-1-1" title="leaf 1-1" is-leaf />
+            <a-tree-node key="0-1" title="承建单位">
+              <a-tree-node key="0-1-0" title="承建单位3" is-leaf />
+              <a-tree-node key="0-1-1" title="承建单位4" is-leaf />
             </a-tree-node>
           </a-directory-tree>
         </div>
@@ -109,15 +118,18 @@
         </a-button>
       </div>
     </a-modal>
+    <div style="text-align: center;margin-top: 10px">
+      <a-button type="primary" @click="onSave">
+        添加
+      </a-button>
+    </div>
   </div>
 </template>
 
 <script>
+  import {deleteReviewTeamById,insertReviewTeam,queryReviewTeamByid,queryReviewTeamList,queryReviewTeamPage,updateReviewTeam} from "@/api/ControlProjectPlan/PlanAuditTeam";
 
   const columns = [
-    // { title: '组员姓名',dataIndex: 'zyxm',key: 'zyxm' },
-    // { title: '组员工号',dataIndex: 'zygh',key: 'zygh' },
-    // { title: '所属组织',dataIndex: 'szzz',key: 'szzz' },
     { title: '审核角色',dataIndex: 'shjs',key: 'shjs' },
     { title: '当前人数',dataIndex: 'dqrs',key: 'dqrs' },
     { title: '操作',dataIndex: 'action', scopedSlots: { customRender: 'action' } },
@@ -227,6 +239,9 @@
       // 搜索
       onSearch () {
       },
+      // 保存
+      onSave () {
+      },
       // 去添加
       onToAdd () {
         this.modalState = true
@@ -264,7 +279,7 @@
         for (let i = 0; i < 20; i++) {
           const data = {
             key: i.toString(),
-            title: `content${i + 1}`,
+            title: `张三${i + 1}`,
             description: `description of content${i + 1}`,
             chosen: Math.random() * 2 > 1,
           };

@@ -6,7 +6,7 @@ import qs from 'qs'
  */
 export const deleteOrganizationByid = (data) => {
   return axios({
-    url: '/web/basic/organization/deleteOrganization',
+    url: '/web/bim/organization/deleteOrganization',
     method: 'delete',
     data:data
   })
@@ -16,7 +16,7 @@ export const deleteOrganizationByid = (data) => {
  */
 export const insertOrganization = (data) => {
   return axios({
-    url: '/web/basic/organization/insertOrganization',
+    url: '/web/bim/organization/insertOrganization',
     method: 'post',
     data:data
   })
@@ -26,7 +26,7 @@ export const insertOrganization = (data) => {
  */
 export const queryOrganizationByid = (data) => {
   return axios({
-    url: '/web/basic/organization/queryOrganization?'+qs.stringify(data),
+    url: '/web/bim/organization/queryOrganization?'+qs.stringify(data),
     method: 'get',
   })
 }
@@ -35,7 +35,7 @@ export const queryOrganizationByid = (data) => {
  */
 export const queryOrganizationList = () => {
   return axios({
-    url: '/web/basic/organization/queryOrganizationList',
+    url: '/web/bim/organization/queryOrganizationList',
     method: 'get',
   })
 }
@@ -44,7 +44,7 @@ export const queryOrganizationList = () => {
  */
 export const queryOrganizationPage = (data) => {
   return axios({
-    url: '/web/basic/organization/queryOrganizationPage?'+qs.stringify(data),
+    url: '/web/bim/organization/queryOrganizationPage?'+qs.stringify(data),
     method: 'get',
   })
 }
@@ -54,7 +54,7 @@ export const queryOrganizationPage = (data) => {
 export const updateOrganization = (data) => {
   console.log(data)
   return axios({
-    url: '/web/basic/organization/updateOrganization',
+    url: '/web/bim/organization/updateOrganization',
     data:data,
     method: 'put',
   })

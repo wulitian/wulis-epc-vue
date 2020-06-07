@@ -78,6 +78,14 @@
     <a-spin :spinning="spinning">
       <a-table :rowClassName="(record, index)=>{return index % 2 === 1? 'odd' : 'even'}" bordered :columns="columns" rowKey="id" :data-source="data" :pagination="false"></a-table>
     </a-spin>
+    <div style="text-align: center;margin-top: 10px">
+      <a-button type="primary" v-if="hasPermission('xmjhkz::ty')">
+        通过
+      </a-button>
+      <a-button type="primary" v-if="hasPermission('xmjhkz::bh')">
+        驳回
+      </a-button>
+    </div>
   </div>
 </template>
 <script>
