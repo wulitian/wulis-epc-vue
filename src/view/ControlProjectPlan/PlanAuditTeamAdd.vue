@@ -4,19 +4,19 @@
       <a-col class="gutter-row" :span="6">
         <div class="gutter-box">
           <label>审核组编号:</label>
-          <a-input v-model="cardForm.shzbh"/>
+          <a-input v-model="form.teamNumber"/>
         </div>
       </a-col>
       <a-col class="gutter-row" :span="6">
         <div class="gutter-box">
           <label>审核组名称:</label>
-          <a-input v-model="cardForm.shzmc"/>
+          <a-input v-model="form.teamName"/>
         </div>
       </a-col>
       <a-col class="gutter-row" :span="6">
         <div class="gutter-box">
           <label>备注:</label>
-          <a-input v-model="cardForm.bz"/>
+          <a-input v-model="form.remark"/>
         </div>
       </a-col>
       <a-col class="gutter-row" :span="6">
@@ -69,7 +69,7 @@
       <a-spin :spinning="spinning">
         <a-table :rowClassName="(record, index)=>{return index % 2 === 1? 'odd' : 'even'}" bordered :columns="columns" rowKey="id" :data-source="data" :pagination="false">
         <span slot="action" slot-scope="text, record">
-          <a @click="onToUpdate(record)">修改</a>
+          <a @click="onToUpdate(record)">配置审核人员</a>
         </span>
         </a-table>
       </a-spin>
@@ -80,58 +80,62 @@
     <a-modal v-model="modalState" :title="modalTitle" :footer="null" width="900px">
       <!--表单-->
       <div style="position: relative;padding-left: 300px;height: 500px">
-        <div style="height: 100%;width: 260px;position: absolute;left: 0;top: 0;border: 1px solid #dddddd;overflow-y: auto;">
-          <a-directory-tree multiple default-expand-all @select="onSelect" @expand="onExpand">
-            <a-tree-node key="0-0" title="承建单位">
-              <a-tree-node key="0-0-0" title="承建单位1" is-leaf />
-              <a-tree-node key="0-0-1" title="承建单位2" is-leaf />
-            </a-tree-node>
-            <a-tree-node key="0-1" title="承建单位">
-              <a-tree-node key="0-1-0" title="承建单位3" is-leaf />
-              <a-tree-node key="0-1-1" title="承建单位4" is-leaf />
-            </a-tree-node>
-          </a-directory-tree>
+        <div style="width: 260px;position: absolute;left: 0px;height: 40px;overflow-y: auto;">
+        <a-select style="width: 100%;" v-model="organization" @change="organizationChange" placeholder="请选择选择机构">
+          <a-select-option v-for="item in organizationList" :value="item.id" :key="item.id">
+            {{item.organizationName}}
+          </a-select-option>
+        </a-select>
         </div>
-        <div style="width: 100%;">
-          <a-transfer
-            :list-style="{width: '250px',height: '500px',}"
-            :data-source="mockData"
-            show-search
-            :locale="{ itemUnit: '项', itemsUnit: '项', notFoundContent: '列表为空', searchPlaceholder: '请输入搜索内容' }"
-            :filter-option="filterOption"
-            :target-keys="targetKeys"
-            :render="item => item.title"
-            @change="handleChange"
-            @search="handleSearch"
+        <div style="width: 260px;position: absolute;left: 0;top: 40px;bottom:0;border: 1px solid #dddddd;overflow-y: auto;">
+          <a-tree
+            :tree-data="departmentTree"
+            show-line
+            default-expand-all
+            @expand="onExpand"
+            @select="onSelect"
           />
+        </div>
+        <div style="height: 100%;width: 260px;position: absolute;left: 280px;top: 0;border: 1px solid #dddddd;overflow-y: auto;">
+          <div  v-for="(item,i) in mockData" :key="item.id" :class="{list:true,active:item.active}" @click="onActive(item,i)">{{item.userName}}</div>
+        </div>
+        <div @click="onRight" style="cursor:pointer;text-align:center;font-size: 30px;color: #00b5a4;height: 50px;width: 50px;position: absolute;left: 540px;top: 198px;border: 1px solid rgb(221, 221, 221);overflow-y: auto;">
+          <a-icon type="forward" />
+        </div>
+        <div style="height: 100%;width: 260px;position: absolute;left: 590px;top: 0;border: 1px solid #dddddd;overflow-y: auto;">
+          <div class="list" v-for="item in targetKeys" :key="item.id">{{item.userName}}</div>
         </div>
       </div>
       <div style="text-align: center;margin-top: 10px">
-        <a-button type="primary" @click="onAdd" v-if="addStatus">
-          添加
-        </a-button>
-        <a-button type="primary" @click="onUpdate" v-else>
-          修改
-        </a-button>
-        <a-button style="margin-left: 10px;" @click="onResetForm">
-          重置
+        <a-button type="primary" @click="onSaveUsers" >
+          保存
         </a-button>
       </div>
     </a-modal>
     <div style="text-align: center;margin-top: 10px">
-      <a-button type="primary" @click="onSave">
+      <a-button type="primary" @click="goBack">
+        返回
+      </a-button>
+      <a-button type="primary" @click="onSave" v-if="addStatus">
         添加
+      </a-button>
+      <a-button type="primary" @click="onUpdate" v-else>
+        修改
       </a-button>
     </div>
   </div>
 </template>
 
 <script>
-  import {deleteReviewTeamById,insertReviewTeam,queryReviewTeamByid,queryReviewTeamList,queryReviewTeamPage,updateReviewTeam} from "@/api/ControlProjectPlan/PlanAuditTeam";
+  import Vue from 'vue'
+  import {deleteReviewTeamById,insertReviewTeam,queryReviewTeamByid,queryReviewTeamList,queryReviewTeamPage,updateReviewTeam,queryReviewRoleList} from "@/api/ControlProjectPlan/PlanAuditTeam";
+  import {queryOrganizationList} from "@/api/BasicInformationManagement/OrganizationManagement";
+  import {queryDepartmentTree} from "@/api/BasicInformationManagement/DepartmentManagement";
+  import {queryUserListByOfficeId} from "@/api/BasicInformationManagement/UserManagement";
 
   const columns = [
-    { title: '审核角色',dataIndex: 'shjs',key: 'shjs' },
-    { title: '当前人数',dataIndex: 'dqrs',key: 'dqrs' },
+    { title: '审核角色',dataIndex: 'roleName',key: 'roleName' },
+    // { title: '当前人数',dataIndex: 'dqrs',key: 'dqrs' },
     { title: '操作',dataIndex: 'action', scopedSlots: { customRender: 'action' } },
   ];
   const data = [
@@ -141,7 +145,7 @@
       zygh: '001',
       szzz: '承建单位',
       dqrs: '0',
-      shjs: '项目管理公司',
+      roleName: '项目管理公司',
     },
     {
       id: '2',
@@ -149,7 +153,7 @@
       zygh: '002',
       szzz: '承建单位',
       dqrs: '2',
-      shjs: '中介公司',
+      roleName: '中介公司',
     },
     {
       id: '3',
@@ -157,7 +161,7 @@
       zygh: '003',
       szzz: '承建单位',
       dqrs: '10',
-      shjs: '审计部门',
+      roleName: '审计部门',
     },
   ];
   //弹窗混入
@@ -207,13 +211,10 @@
       }
     },
     methods: {
-      // 搜索
-      onSearch () {
-      },
       // 去添加
       onToAdd () {
         this.modalState = true
-        this.modalTitle = '新增工程类型';
+        this.modalTitle = '新增';
         this.addStatus = true;
         this.form = {
           zyxm:'',
@@ -236,23 +237,60 @@
       }
     },
     methods: {
-      // 搜索
-      onSearch () {
+      goBack() {
+        this.$router.go(-1)
       },
       // 保存
       onSave () {
+        if(this.form.teamNumber == ''){
+          this.$message.info('审核组编号');
+          return false;
+        }
+        if(this.form.teamName == ''){
+          this.$message.info('审核组名称');
+          return false;
+        }
+        if(this.form.roles[0].userIds.length == 0){
+          this.$message.info('请为审核管理部门配置审批人');
+          return false;
+        }
+        if(this.form.roles[1].userIds.length == 0){
+          this.$message.info('请为中介公司配置审批人');
+          return false;
+        }
+        if(this.form.roles[2].userIds.length == 0){
+          this.$message.info('请为审计公司配置审批人');
+          return false;
+        }
+        insertReviewTeam(this.form)
+          .then(res => {
+            if(res.code==2020200){
+              console.log(res)
+              this.$message.info(res.message);
+              this.goBack();
+            }else{
+              this.$message.info(res.message);
+            }
+          })
+          .catch((e) => {
+            console.log(e)
+          })
       },
-      // 去添加
-      onToAdd () {
-        this.modalState = true
-        this.modalTitle = '新增工程类型';
-        this.addStatus = true;
-        this.form = {
-          zyxm:'',
-          zygh:'',
-          szzz:1
-        };
-      }
+      onUpdate(){
+        updateReviewTeam(Object.assign(this.form,{id:this.id}))
+          .then(res => {
+            if(res.code==2020200){
+              console.log(res)
+              this.$message.info(res.message);
+              this.goBack();
+            }else{
+              this.$message.info(res.message);
+            }
+          })
+          .catch((e) => {
+            console.log(e)
+          })
+      },
     }
   };
   //穿梭盒子混入
@@ -263,33 +301,63 @@
         targetKeys: [],
       }
     },
-    mounted() {
-      this.getMock();
-    },
     methods: {
       onSelect(keys, event) {
-        console.log('Trigger Select', keys, event);
+        if(keys[0]!=null){
+          let params = {id:keys[0]}
+          console.log(params)
+          queryUserListByOfficeId({id:keys[0]})
+            .then(res => {
+              if(res.code==2020200){
+                console.log(res)
+                this.mockData = res.data;
+                this.mockData.forEach((e,i)=>{
+                  e.active=false;
+                })
+              }else{
+                this.$message.info(res.message);
+              }
+            })
+            .catch((e) => {
+              console.log(e)
+            })
+        }
+
+      },
+      onActive(item,i){
+        if(item.active){
+          item.active = false
+        }else{
+          item.active = true
+        }
+        Vue.set(this.mockData,i,item)
+      },
+      ishas(id){
+        let state = true;
+        console.log(state)
+        this.targetKeys.forEach((e)=>{
+          if(e.id==id){
+            state = false;
+          }
+        })
+        console.log(state)
+        return state
+      },
+      onRight(){
+        this.mockData.forEach((e,i)=>{
+          if(e.active){
+            if(this.ishas(e.id)){
+              this.targetKeys.push(e)
+            }else{
+              this.$message.info('存在重复的'+e.userName+'已过滤');
+            }
+          }
+          e.active = false;
+          Vue.set(this.mockData,i,e)
+        })
       },
       onExpand() {
         console.log('Trigger Expand');
-      },
-      getMock() {
-        const targetKeys = [];
-        const mockData = [];
-        for (let i = 0; i < 20; i++) {
-          const data = {
-            key: i.toString(),
-            title: `张三${i + 1}`,
-            description: `description of content${i + 1}`,
-            chosen: Math.random() * 2 > 1,
-          };
-          if (data.chosen) {
-            targetKeys.push(data.key);
-          }
-          mockData.push(data);
-        }
-        this.mockData = mockData;
-        this.targetKeys = targetKeys;
       },
       filterOption(inputValue, option) {
         return option.description.indexOf(inputValue) > -1;
@@ -297,6 +365,7 @@
       handleChange(targetKeys, direction, moveKeys) {
         console.log(targetKeys, direction, moveKeys);
         this.targetKeys = targetKeys;
+        console.log(this.targetKeys)
       },
       handleSearch(dir, value) {
         console.log('search:', dir, value);
@@ -310,15 +379,34 @@
         labelCol: { span: 8 },
         wrapperCol: { span: 14 },
         id:'',
+        roleType:'',
+        organization:'',
         form:{
-          zyxm:'',
-          zygh:'',
-          szzz:1
+          enable: 1,
+          remark: '',
+          roles: [
+            {
+              roleType: '1',
+              roleName: '',
+              userIds: [],
+              userIdsList: []
+            },
+            {
+              roleType: '2',
+              roleName: '',
+              userIds: [],
+              userIdsList: []
+            },
+            {
+              roleType: '3',
+              roleName: '',
+              userIds: [],
+              userIdsList: []
+            }
+          ],
+          teamName: '',
+          teamNumber: ''
         },
-        rules: {
-          zyxm: [{ required: true, message: '请输入工程类型', trigger: 'blur' }],
-          zygh: [{ required: true, message: '请输入描述', trigger: 'blur' }],
-        }
       }
     },
     created () {
@@ -326,49 +414,34 @@
     methods: {
       //添加
       onAdd(){
-        this.$refs.ruleForm.validate(valid => {
-          if (valid) {
-            // addUser(params)
-            //   .then(res => {
-            //     if(res.code==2020200){
-            //       console.log(res)
-            //       this.onSelectUserList();
-            //       this.updateModal = false;
-            //       this.$message.info(res.message);
-            //     }else{
-            //       this.$message.info(res.message);
-            //     }
-            //   })
-            //   .catch((e) => {
-            //     console.log(e)
-            //   })
-          } else {
-            return false;
-          }
-        });
+        console.log(this.form)
+        insertReviewTeam(this.form)
+          .then(res => {
+            if(res.code==2020200){
+              console.log(res)
+              this.$message.info(res.message);
+            }else{
+              this.$message.info(res.message);
+            }
+          })
+          .catch((e) => {
+            console.log(e)
+          })
+
       },
       //修改
-      onUpdate(){
-        this.$refs.ruleForm.validate(valid => {
-          if (valid) {
-            // updateUser(params)
-            //   .then(res => {
-            //     if(res.code==2020200){
-            //       console.log(res)
-            //       this.onSelectUserList();
-            //       this.updateModal = false;
-            //       this.$message.info(res.message);
-            //     }else{
-            //       this.$message.info(res.message);
-            //     }
-            //   })
-            //   .catch((e) => {
-            //     console.log(e)
-            //   })
-          } else {
-            return false;
+      onSaveUsers(){
+        this.form.roles.forEach((e,i)=>{
+          if(e.roleType == this.roleType){
+            e.userIdsList = this.targetKeys;
+            console.log( e.userIdsList)
+            e.userIds=[];
+            this.targetKeys.forEach((e2,i)=>{
+              e.userIds.push(e2.id);
+            })
           }
-        });
+        })
+        this.modalState = false;
       },
       //重置表单
       onResetForm(){
@@ -387,11 +460,132 @@
         },
         columns,
         data,
+        organizationList:[],
+        departmentTree:[]
       }
     },
     created () {
+      let obj = this.$route.query
+      if(obj.state == 'update'){
+        this.addStatus = false;
+        this.id = obj.id;
+        this.queryReviewTeamByid({id:obj.id});
+      }
+      this.queryReviewRoleList();
+      this.queryOrganizationList();
+
     },
     methods: {
+      // 查询根据id
+      queryReviewTeamByid(id){
+        this.spinning = true;
+        queryReviewTeamByid(id)
+          .then(res => {
+            if(res.code==2020200){
+              console.log(res)
+              res.data.roles.forEach((e,i)=>{
+                  if(e.roleType=='1'){
+                    this.form.roles[0].roleName = e.roleName
+                    this.form.roles[0].roleType = e.roleType
+                    e.users.forEach((e2)=>{
+                      e2.id = e2.userId;
+                      this.form.roles[0].userIds.push(e2.id);
+                    })
+                    this.form.roles[0].userIdsList = e.users
+                  }
+                  if(e.roleType=='2'){
+                    this.form.roles[1].roleName = e.roleName
+                    this.form.roles[1].roleType = e.roleType
+                    e.users.forEach((e2)=>{
+                      e2.id = e2.userId;
+                      this.form.roles[1].userIds.push(e2.id);
+                    })
+                    this.form.roles[1].userIdsList = e.users
+                  }
+                if(e.roleType=='3'){
+                  this.form.roles[2].roleName = e.roleName
+                  this.form.roles[2].roleType = e.roleType
+                  e.users.forEach((e2)=>{
+                    e2.id = e2.userId;
+                    this.form.roles[2].userIds.push(e2.id);
+                  })
+                  this.form.roles[2].userIdsList = e.users
+                }
+              });
+                this.form.enable=res.data.enable,
+                this.form.remark=res.data.remark,
+                this.form.teamName=res.data.teamName,
+                this.form.teamNumber=res.data.teamNumber,
+              console.log(this.form)
+              this.spinning = false;
+            }else{
+              this.$message.info(res.message);
+              this.spinning = false;
+            }
+          })
+          .catch((e) => {
+            console.log(e)
+          })
+      },
+      // 列表查询
+      queryReviewRoleList(){
+        this.spinning = true;
+        queryReviewRoleList()
+          .then(res => {
+            if(res.code==2020200){
+              console.log(res)
+              this.data = res.data;
+              this.spinning = false;
+            }else{
+              this.$message.info(res.message);
+              this.spinning = false;
+            }
+          })
+          .catch((e) => {
+            console.log(e)
+          })
+      },
+      //查询责任单位
+      queryOrganizationList(){
+        queryOrganizationList()
+          .then(res => {
+            if(res.code==2020200){
+              this.organizationList = res.data;
+            }else{
+              this.$message.info(res.message);
+            }
+          })
+          .catch((e) => {
+            console.log(e)
+          })
+      },
+      //修改tree的key值
+      getTreeDepartment(data) {
+        for(let i = 0; i < data.length; i++) {
+          data[i].title = data[i].departmentName;
+          data[i].value = data[i].id;
+          data[i].key = data[i].id;
+          if(data[i].nodes&&data[i].nodes.length>0){
+            data[i].children = data[i].nodes;
+            this.getTreeDepartment(data[i].nodes)
+          }
+        }
+      },
+      //机构改变
+      organizationChange(value){
+        queryDepartmentTree({organizationId:value})
+          .then(res => {
+            if(res.code==2020200){
+              this.departmentTree = res.data;
+              this.getTreeDepartment(this.departmentTree);
+            }else{
+              this.$message.info(res.message);
+            }
+          })
+          .catch((e) => {
+            console.log(e)
+          })
+      },
       // 查看
       onView (record) {
         console.log(record)
@@ -399,24 +593,18 @@
       // 修改
       onToUpdate (record) {
         this.modalState = true;
-        this.modalTitle = '修改工程类型';
-        this.addStatus = false;
-        // queryUserByid({id:record.id})
-        //   .then(res => {
-        //     if(res.code==2020200){
-        //       this.form = {
-        //         zyxm:res.data.zyxm,
-        //         ms:res.data.ms,
-        //         szzz:res.data.szzz,
-        //       };
-        //       this.id = res.data.id;
-        //     }else{
-        //       this.$message.info(res.message);
-        //     }
-        //   })
-        //   .catch((e) => {
-        //     console.log(e)
-        //   })
+        this.modalTitle = '修改';
+        this.roleType = record.roleType;
+        this.mockData = [];
+        this.targetKeys = [];
+        this.departmentTree = [];
+        this.organization = '';
+        //targetKeys
+        this.form.roles.forEach((e,i)=>{
+          if(e.roleType == this.roleType){
+            this.targetKeys = e.userIdsList;
+          }
+        })
         console.log(record)
       },
       // 删除确认
@@ -458,5 +646,19 @@
     line-height: 32px;
     position: absolute;
     left: 0;
+  }
+  .list{
+    border-bottom: 1px solid #ddd;
+    height: 30px;
+    line-height: 30px;
+    padding: 0 10px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+  .active{
+    background: #00b5a4;
+    color: #fff;
   }
 </style>

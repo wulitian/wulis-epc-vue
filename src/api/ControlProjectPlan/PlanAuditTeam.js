@@ -58,3 +58,12 @@ export const updateReviewTeam = (data) => {
     method: 'put',
   })
 }
+/**
+ * 查询审核角色列表(全量)
+ */
+export const queryReviewRoleList = (data) => {
+  return axios({
+    url: '/web/ppc/review/role/queryReviewRoleList?'+qs.stringify(data),
+    method: 'get',
+  })
+}

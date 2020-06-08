@@ -104,7 +104,7 @@
       },
       // 去添加
       onToAdd () {
-        this.$router.push("/main/ControlProjectPlan/PlanAuditTeamAdd")
+        this.$router.push({path:"/main/ControlProjectPlan/PlanAuditTeamAdd",query: {state:'add'}});
       }
     }
   };
@@ -149,7 +149,7 @@
       },
       // 修改
       onToUpdate (record) {
-        this.$router.push("/main/ControlProjectPlan/PlanAuditTeamAdd")
+        this.$router.push({path:"/main/ControlProjectPlan/PlanAuditTeamAdd",query: {id: record.id,state:'update'}});
       },
       // 删除确认
       onDeleteConfirm (record) {
