@@ -465,7 +465,7 @@
       onAdd(){
         this.$refs.ruleForm.validate(valid => {
           if (valid) {
-            insertContractInfo(Object.assign(this.form,{fileRecordList:this.fileRecordList}))
+            insertContractInfo(Object.assign(this.form,{accessoriesUrl:JSON.stringify(this.fileRecordList)}))
               .then(res => {
                 if(res.code==2020200){
                   this.queryContractInfoPage();
@@ -487,7 +487,7 @@
       onUpdate(){
         this.$refs.ruleForm.validate(valid => {
           if (valid) {
-            updateContractInfo(Object.assign(this.form,{id:this.id,fileRecordList:this.fileRecordList}))
+            updateContractInfo(Object.assign(this.form,{id:this.id,accessoriesUrl:JSON.stringify(this.fileRecordList)}))
               .then(res => {
                 if(res.code==2020200){
                   this.queryContractInfoPage();
@@ -524,6 +524,7 @@
         fileList.forEach(file => {
           formData.append('file', file);
         });
+        formData.append('type', '1');
         this.uploading = true;
         attachmentUpload(formData)
           .then(res => {
@@ -712,7 +713,9 @@
                 warrantyPeriod:res.data.warrantyPeriod,
               };
               this.id = res.data.id;
-              this.fileRecordList = res.data.fileRecordList;
+              console.log(JSON.parse(res.data.accessoriesUrl))
+              this.fileRecordList = JSON.parse(res.data.accessoriesUrl)==null?[]:JSON.parse(res.data.accessoriesUrl);
+
             }else{
               this.$message.info(res.message);
             }

@@ -2,7 +2,7 @@ import Vue from 'vue'
 import router from './router'
 import store from './store'
 const defaultRoutePath = '/main'
-const whiteList = ['Login','Test']
+const whiteList = ['Login','Workplace']
 import { ACCESS_TOKEN } from '@/store/mutation-types'
 router.beforeEach((to, from, next) => {
   if (Vue.ls.get(ACCESS_TOKEN)!=null) {

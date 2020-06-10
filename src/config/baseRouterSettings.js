@@ -6,9 +6,19 @@ export const baseRouterMap = [
     component: () => import('@/components/Login'),
   },
   {
-    path: '/Test',
-    name: 'Test',
-    component: () => import('@/components/Test'),
+    path: '/',
+    name: 'main',
+    component: () => import('@/components/Main'),
+    redirect: '/main/Workplace',
+    meta: { title: '首页' },
+    children:[
+      {
+        path: '/main/Workplace',
+        name: 'Workplace',
+        component: () => import('@/components/Workplace'),
+        meta: { title: '工作区' },
+      }
+    ]
   }
 ]
 //异步路由
@@ -22,8 +32,8 @@ export const asyncRouterMap = [
     meta: { title: '首页' },
     children:[
       {
-        path: '/main/workplace',
-        name: 'workplace',
+        path: '/main/Workplace',
+        name: 'Workplace',
         component: () => import('@/components/Workplace'),
         meta: { title: '工作区' },
       }

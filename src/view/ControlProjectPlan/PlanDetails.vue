@@ -1,54 +1,46 @@
 <template>
   <div>
-    <!--tabs-->
-    <!--<a-tabs type="card" @change="tabChange">-->
-      <!--<a-tab-pane key="1" tab="济南市医院">-->
-      <!--</a-tab-pane>-->
-      <!--<a-tab-pane key="2" tab="文化广场">-->
-      <!--</a-tab-pane>-->
-    <!--</a-tabs>-->
-    <!--header-->
     <a-page-header
       style="border: 1px solid rgb(235, 237, 240)"
       :title="pageHeadForm.title"
-      :sub-title="pageHeadForm.subTitle"
       @back="() => $router.go(-1)"
     >
       <template slot="extra">
-        <a-button key="1" v-if="hasPermission('xmjhkz::kssg')">
+        <a-button key="1" v-if="hasPermission('xmjhkz::kssg')&&descriptions.planStage==0" @click="applyNextPlanProcess">
           开始施工
         </a-button>
-        <a-button key="2" v-if="hasPermission('xmjhkz::zqsg')">
+        <span v-if="descriptions.planStage==1">申请施工状态</span>
+        <a-button key="2" v-if="hasPermission('xmjhkz::zqsg')&&descriptions.planStage==2" @click="applyNextPlanProcess">
           中期施工
         </a-button>
-        <a-button key="3" type="primary" v-if="hasPermission('xmjhkz::jsjg')">
+        <span v-if="descriptions.planStage==3">申请中期施工</span>
+        <a-button key="3" v-if="hasPermission('xmjhkz::jsjg')&&descriptions.planStage==4" @click="applyNextPlanProcess">
           结束竣工
         </a-button>
-        <a-button key="4" type="primary" v-if="hasPermission('xmjhkz;;jhxq::bh')">
+        <span v-if="descriptions.planStage==5">申请竣工状态</span>
+        <span v-if="descriptions.planStage==6">竣工阶段</span>
+        <a-button key="4" type="primary" v-if="hasPermission('xmjhkz;;jhxq::bh')" @click="approvalNextPlanProcess('0')">
           驳回
         </a-button>
-        <a-button key="5" type="primary" v-if="hasPermission('xmjhkz;;jhxq::ty')">
+        <a-button key="5" type="primary" v-if="hasPermission('xmjhkz;;jhxq::ty')" @click="approvalNextPlanProcess('1')">
           同意
         </a-button>
       </template>
       <a-descriptions size="small" :column="3">
         <a-descriptions-item label="合同数">
-          {{2}}
+          {{descriptions.contractNum}}
         </a-descriptions-item>
-        <a-descriptions-item label="报告书">
-          {{2}}
+        <a-descriptions-item label="报告数">
+          {{descriptions.reportNum}}
         </a-descriptions-item>
         <a-descriptions-item label="未审核数量">
-          {{2}}
+          {{descriptions.notApprovedNum}}
         </a-descriptions-item>
         <a-descriptions-item label="计划开始时间/计划结束时间">
-          {{'2019-10-10/2010-10-20'}}
+          {{descriptions.startTime}}-{{descriptions.endTime}}
         </a-descriptions-item>
         <a-descriptions-item label="目前工期阶段">
-          {{'前期准备阶段'}}
-        </a-descriptions-item>
-        <a-descriptions-item label="项目工程数量">
-          {{2}}
+          {{ztList[descriptions.planStage]}}
         </a-descriptions-item>
       </a-descriptions>
     </a-page-header>
@@ -56,13 +48,13 @@
     <div class="a-header" style="margin-top: 10px">
       <a-col class="gutter-row" :span="4">
         <a-radio-group v-model="headerForm.shzt">
-          <a-radio-button value="large">
+          <a-radio-button value="">
             全部
           </a-radio-button>
-          <a-radio-button value="default">
+          <a-radio-button value="0">
             待审核
           </a-radio-button>
-          <a-radio-button value="small">
+          <a-radio-button value="1">
             已审核
           </a-radio-button>
         </a-radio-group>
@@ -70,13 +62,13 @@
       <a-col class="gutter-row" :span="4">
         <div class="gutter-box">
           <label>任务名称:</label>
-          <a-input v-model="headerForm.rwmc"/>
+          <a-input v-model="headerForm.materialName"/>
         </div>
       </a-col>
       <span style="margin-left: 10px">
         <a-button type="primary" @click="onSearch">查询</a-button>
-        <a-button type="primary" @click="onToAddHt" v-if="hasPermission('xmjhkz::xzht')">新增合同</a-button>
-        <a-button type="primary" @click="onToAddBg" v-if="hasPermission('xmjhkz::xzbg')">新增报告</a-button>
+        <a-button type="primary" @click="onToAddHt" v-if="hasPermission('xmjhkz::xzht')" >新增合同</a-button>
+        <a-button type="primary" @click="onToAddBg" v-if="hasPermission('xmjhkz::xzbg')" >新增报告</a-button>
       </span>
     </div>
     <!-- 列表 -->
@@ -90,16 +82,8 @@
     <!-- 分页 -->
     <a-pagination v-if="total>=10" style="float: right;margin-top: 10px" :total="total" :default-current="1" show-size-changer show-quick-jumper @change="onPaginationChange" @showSizeChange="onShowSizeChange"/>
     <!--弹窗-->
-    <a-modal v-model="htModalState" :title="htModalTitle" :footer="null" width="1200px">
+    <a-modal v-model="htModalState" :title="htModalTitle" :footer="null" >
       <!--表单-->
-      <a-radio-group v-model="HtChangelx" style="margin-left: 90px;margin-bottom: 10px">
-        <a-radio :value="0">
-          选择合同
-        </a-radio>
-        <a-radio :value="1">
-          新增合同
-        </a-radio>
-      </a-radio-group>
       <a-form-model
         ref="ruleForm"
         :model="form"
@@ -107,195 +91,23 @@
         :label-col="labelCol"
         :wrapper-col="wrapperCol"
       >
-        <a-row v-if="HtChangelx=='0'">
-          <a-col :span="8">
-            <a-form-model-item label="名称" prop="mc">
-              <a-input v-model="form.mc" />
-            </a-form-model-item>
-          </a-col>
-          <a-col :span="8">
-            <a-form-model-item label="合同选择" prop="mc">
-              <a-select style="width: 100%"v-model="form.mc">
-                <a-select-option value="jack">
-                  Jack
-                </a-select-option>
-                <a-select-option value="lucy">
-                  Lucy
-                </a-select-option>
-              </a-select>
-            </a-form-model-item>
-          </a-col>
-        </a-row>
-        <a-row v-if="HtChangelx=='1'">
-          <a-col :span="8">
-            <a-form-model-item label="名称" prop="mc">
-              <a-input v-model="form.mc" />
-            </a-form-model-item>
-          </a-col>
-          <a-col :span="8">
-            <a-form-model-item label="合同" prop="ht">
-              <a-input v-model="form.ht"/>
-            </a-form-model-item>
-          </a-col>
-          <a-col :span="8">
-            <a-form-model-item label="合同分类" prop="htfl">
-              <a-select style="width: 100%" v-model="form.htfl">
-                <a-select-option value="jack">
-                  Jack
-                </a-select-option>
-              </a-select>
-            </a-form-model-item>
-          </a-col>
-          <a-col :span="8">
-            <a-form-model-item label="合同编号" prop="htbh">
-              <a-input v-model="form.htbh"/>
-            </a-form-model-item>
-          </a-col>
-          <a-col :span="8">
-            <a-form-model-item label="日期" prop="rq">
-              <a-date-picker v-model="form.rq" />
-            </a-form-model-item>
-          </a-col>
-          <a-col :span="8">
-            <a-form-model-item label="所属部门" prop="ssbm">
-              <a-select style="width: 100%" v-model="form.ssbm">
-                <a-select-option value="jack">
-                  Jack
-                </a-select-option>
-              </a-select>
-            </a-form-model-item>
-          </a-col>
-          <a-col :span="8">
-            <a-form-model-item label="往来单位" prop="wldw">
-              <a-select style="width: 100%" v-model="form.wldw">
-                <a-select-option value="jack">
-                  Jack
-                </a-select-option>
-              </a-select>
-            </a-form-model-item>
-          </a-col>
-          <a-col :span="8">
-            <a-form-model-item label="客户联系人" prop="kulxr">
-              <a-input v-model="form.kulxr"/>
-            </a-form-model-item>
-          </a-col>
-          <a-col :span="8">
-            <a-form-model-item label="客户联系电话" prop="kulxdh">
-              <a-input v-model="form.kulxdh"/>
-            </a-form-model-item>
-          </a-col>
-          <a-col :span="8">
-            <a-form-model-item label="所属项目" prop="ssxm">
-              <a-select style="width: 100%" v-model="form.ssxm">
-                <a-select-option value="jack">
-                  Jack
-                </a-select-option>
-              </a-select>
-            </a-form-model-item>
-          </a-col>
-          <a-col :span="8">
-            <a-form-model-item label="合同金额（元）" prop="htje">
-              <a-input v-model="form.htje"/>
-            </a-form-model-item>
-          </a-col>
-          <a-col :span="8">
-            <a-form-model-item label="质保期（年）" prop="zbq">
-              <a-input v-model="form.zbq"/>
-            </a-form-model-item>
-          </a-col>
-          <a-col :span="8">
-            <a-form-model-item label="质保金比例（%）" prop="zbjbl">
-              <a-input v-model="form.zbjbl"/>
-            </a-form-model-item>
-          </a-col>
-          <a-col :span="8">
-            <a-form-model-item label="经办人" prop="jbr">
-              <a-input v-model="form.jbr"/>
-            </a-form-model-item>
-          </a-col>
-          <a-col :span="8">
-            <a-form-model-item label="开始日期" prop="ksrq">
-              <a-date-picker v-model="form.ksrq" />
-            </a-form-model-item>
-          </a-col>
-          <a-col :span="8">
-            <a-form-model-item label="结束日期" prop="jsrq">
-              <a-date-picker v-model="form.jsrq" />
-            </a-form-model-item>
-          </a-col>
-          <a-col :span="8">
-            <a-form-model-item label="收/付款预警" prop="sfkyj">
-              <a-radio-group v-model="form.sfkyj">
-                <a-radio :value="0">
-                  收款预警
-                </a-radio>
-                <a-radio :value="1">
-                  付款预警
-                </a-radio>
-              </a-radio-group>
-            </a-form-model-item>
-          </a-col>
-          <a-col :span="8">
-            <a-form-model-item label="付款达到" prop="fkdd">
-              <a-input v-model="form.fkdd"/>
-            </a-form-model-item>
-          </a-col>
-          <a-col :span="8">
-            <a-form-model-item label="到期预警" prop="dqyj">
-              <a-radio-group v-model="form.dqyj">
-                <a-radio :value="0">
-                  否
-                </a-radio>
-                <a-radio :value="1">
-                  是
-                </a-radio>
-              </a-radio-group>
-            </a-form-model-item>
-          </a-col>
-          <a-col :span="8">
-            <a-form-model-item label="预警天数" prop="yjts">
-              <a-input v-model="form.yjts"/>
-            </a-form-model-item>
-          </a-col>
-          <a-col :span="8">
-            <a-form-model-item label="收/付款条件" prop="sfktj">
-              <a-input v-model="form.sfktj"/>
-            </a-form-model-item>
-          </a-col>
-          <a-col :span="8">
-            <a-form-model-item label="备注" prop="remark">
-              <a-input v-model="form.remark"/>
-            </a-form-model-item>
-          </a-col>
-          <a-col :span="8">
-            <a-form-model-item label="提成比例" prop="tcbl">
-              <a-input v-model="form.tcbl"/>
-            </a-form-model-item>
-          </a-col>
-          <a-col :span="8">
-            <a-form-model-item label="是否结算" prop="sfjs">
-              <a-radio-group v-model="form.sfjs">
-                <a-radio :value="0">
-                  否
-                </a-radio>
-                <a-radio :value="1">
-                  是
-                </a-radio>
-              </a-radio-group>
-            </a-form-model-item>
-          </a-col>
-        </a-row>
-        <a-form-model-item v-if="HtChangelx=='1'" :wrapper-col="{ span: 20, offset: 0 }" :label-col="{ span: 3 }" style="margin-left: -18px" label="上传附件" prop="scfj">
-          <a-upload
-            style="margin-top: -40px"
-            action="https://www.mocky.io/v2/5cc8019d300000980a055e76"
-            :default-file-list="defaultFileList"
-          >
-            <a-button> <a-icon type="upload" /> 上传附件 </a-button>
-          </a-upload>
+        <a-form-model-item label="名称" prop="materialName">
+          <a-input v-model="form.materialName" />
+        </a-form-model-item>
+        <a-form-model-item label="合同选择" prop="contractId">
+          <a-select style="width: 100%;" v-model="form.contractId">
+            <a-select-option v-for="item in contractInfoList" :value="item.id" :key="item.id">
+              <a-tooltip>
+                <template slot="title">
+                  {{item.contractName}}
+                </template>
+                {{item.contractName}}
+              </a-tooltip>
+            </a-select-option>
+          </a-select>
         </a-form-model-item>
         <a-form-model-item :wrapper-col="{ span: 14, offset: 4 }">
-          <a-button type="primary" @click="onAdd" >
+          <a-button type="primary" @click="onHtAdd" >
             添加
           </a-button>
           <a-button style="margin-left: 10px;" @click="onResetForm">
@@ -305,7 +117,7 @@
       </a-form-model>
     </a-modal>
     <!--弹窗-->
-    <a-modal v-model="bgModalState" :title="bgModalTitle" :footer="null">
+    <a-modal v-model="bgModalState" :title="bgModalTitle" :footer="null" width="800px">
       <!--表单-->
       <a-form-model
         ref="ruleForm"
@@ -314,20 +126,39 @@
         :label-col="labelCol"
         :wrapper-col="wrapperCol"
       >
-        <a-form-model-item label="名称" prop="mc">
-          <a-input v-model="form.mc" />
+        <a-form-model-item :wrapper-col="{ span: 20, offset: 0 }" :label-col="{ span: 3 }" label="名称" prop="materialName">
+          <a-input v-model="form.materialName" />
         </a-form-model-item>
-        <a-form-model-item :wrapper-col="{ span: 10, offset: 0 }" :label-col="{ span: 8 }" style="margin-left: -18px" label="上传附件" prop="scfj">
+        <a-form-model-item :wrapper-col="{ span: 20, offset: 0 }" :label-col="{ span: 3 }" style="margin-left: -18px" label="已上传文件" >
+          <a-table :rowClassName="(record, index)=>{return index % 2 === 1? 'odd' : 'even'}" bordered :columns="uploadColumns" rowKey="id" :data-source="fileRecordList" :pagination="false">
+              <span slot="action" slot-scope="text, record">
+                  <a href="#" @click="deleteUpload(record)">删除</a>
+              </span>
+          </a-table>
+        </a-form-model-item>
+        <a-form-model-item :wrapper-col="{ span: 20, offset: 0 }" :label-col="{ span: 3 }" style="margin-left: -18px" label="上传附件" >
           <a-upload
             style="margin-top: -40px"
-            action="https://www.mocky.io/v2/5cc8019d300000980a055e76"
-            :default-file-list="defaultFileList"
+            multiple
+            :remove="removeUpload"
+            :before-upload="beforeUpload"
+            :file-list="fileList"
+            :transform-file="transformFile"
           >
-            <a-button> <a-icon type="upload" /> 上传附件 </a-button>
+            <a-button> <a-icon type="upload" /> 选择附件</a-button>
           </a-upload>
+          <a-button
+            type="primary"
+            :disabled="fileList.length === 0"
+            :loading="uploading"
+            style="margin-top: 16px"
+            @click="upload"
+          >
+            {{ uploading ? '上传中' : '上传附件' }}
+          </a-button>
         </a-form-model-item>
         <a-form-model-item :wrapper-col="{ span: 14, offset: 4 }">
-          <a-button type="primary" @click="onAdd">
+          <a-button type="primary" @click="onBgAdd">
             添加
           </a-button>
           <a-button style="margin-left: 10px;" @click="onResetForm">
@@ -336,66 +167,50 @@
         </a-form-model-item>
       </a-form-model>
     </a-modal>
+    <div style="text-align: center;margin-top: 10px">
+      <a-button type="primary" @click="goBack">
+        返回
+      </a-button>
+    </div>
   </div>
 </template>
 
 <script>
-  const defaultFileList=[
-    {
-      uid: '1',
-      name: 'xxx.png',
-      status: 'done',
-      response: 'Server Error 500', // custom error message to show
-      url: 'http://www.baidu.com/xxx.png',
-    },
-    {
-      uid: '2',
-      name: 'yyy.png',
-      status: 'done',
-      url: 'http://www.baidu.com/yyy.png',
-    },
-    {
-      uid: '3',
-      name: 'zzz.png',
-      status: 'error',
-      response: 'Server Error 500', // custom error message to show
-      url: 'http://www.baidu.com/zzz.png',
-    }];
+
+  import {queryPlanDetail} from "@/api/ControlProjectPlan/PlanManagement";
+  import {applyNextPlanProcess,approvalNextPlanProcess,insertPlanContract,insertPlanReport,queryApprovalStatus,queryPlanMaterialPage,uploadReport} from "@/api/ControlProjectPlan/PlanDetails";
+  import {queryContractInfoList} from "@/api/ItemContractManagement/ContractParameter";
   const columns = [
-    { title: '任务名称',dataIndex: 'rwmc',key: 'rwmc' },
-    { title: '发起人',dataIndex: 'fqr',key: 'fqr' },
-    { title: '开始时间',dataIndex: 'kssj',key: 'kssj' },
-    { title: '审核状态',dataIndex: 'enable',key: 'enable' },
+    { title: '任务名称',dataIndex: 'materialName',key: 'materialName' },
+    { title: '发起人',dataIndex: 'userName',key: 'userName' },
+    { title: '材料类型',dataIndex: 'materialType',key: 'materialType' },
+    { title: '开始时间',dataIndex: 'createTime',key: 'createTime' },
+    { title: '审核状态',dataIndex: 'auditState',key: 'auditState' },
     { title: '操作',dataIndex: 'action', scopedSlots: { customRender: 'action' } },
+  ];
+  const uploadColumns = [
+    { title: '文件名称',dataIndex: 'fileName',key: 'fileName' ,width:200},
+    { title: '文件路径',dataIndex: 'fileUrl',key: 'fileUrl',width:200},
+    { title: '文件大小',dataIndex: 'fileSize',key: 'fileSize',width:200},
+    { title: '文件类型',dataIndex: 'fileExt',key: 'fileExt' ,width:200},
+    { title: '操作',dataIndex: 'action', scopedSlots: { customRender: 'action' } ,width:200},
   ];
   const data = [
     {
       id: '1',
-      rwmc: '电缆铺线材料合同',
-      fqr: '张三',
-      kssj: '2020-10-20',
-      enable: '中介审核',
+      materialName: '电缆铺线材料合同',
+      userName: '张三',
+      materialType: '2020-10-20',
+      auditState: '中介审核',
     },
     {
       id: '2',
-      rwmc: '配电设配AD-768购买合同',
-      fqr: '李四',
-      kssj: '2020-10-20',
-      enable: '项目审计',
+      materialName: '配电设配AD-768购买合同',
+      userName: '李四',
+      materialType: '2020-10-20',
+      auditState: '项目审计',
     },
   ];
-  //头部混入
-  const cardMixins = {
-    data () {
-      return {
-      }
-    },
-    methods: {
-      // 搜索
-      tabChange () {
-      },
-    }
-  };
   //弹窗混入
   const modalMixins = {
     data () {
@@ -437,7 +252,6 @@
       return {
         pageHeadForm:{
           title:'济南市医院',
-          subTitle:'项目相关描述',
         }
       }
     },
@@ -447,14 +261,15 @@
     data () {
       return {
         headerForm:{
-          shzt:'',
-          rwmc:'',
+          auditState:'',
+          materialName:'',
         }
       }
     },
     methods: {
       // 搜索
       onSearch () {
+        this.queryPlanMaterialPage();
       },
       // 去添加报告
       onToAddBg () {
@@ -463,7 +278,7 @@
         this.form={
           jhmc:'',
           sjxm:'',
-          kssj:'',
+          materialType:'',
           jssj:'',
           jhshz:'',
           ms:'',
@@ -474,12 +289,8 @@
         this.htModalState = true
         this.htModalTitle = '新增合同';
         this.form={
-          jhmc:'',
-          sjxm:'',
-          kssj:'',
-          jssj:'',
-          jhshz:'',
-          ms:'',
+          contractId:'',
+          planId:'',
         }
       }
     }
@@ -490,47 +301,80 @@
       return {
         labelCol: { span: 8 },
         wrapperCol: { span: 14 },
+        planId:'',
         id:'',
         HtChangelx:0,
         form:{
-          jhmc:'',
-          sjxm:'',
-          kssj:'',
-          jssj:'',
-          jhshz:'',
-          ms:'',
+          materialName:'',
+          materialUrl: '',
+          contractId:'',
         },
         rules: {
-          jhmc: [{ required: true, message: '请输入计划名称', trigger: 'blur' }],
-          sjxm: [{ required: true, message: '请选择设计项目', trigger: 'change' }],
-          kssj: [{ required: true, message: '请选择开始时间', trigger: 'change' }],
-          jssj: [{ required: true, message: '请选择结束时间', trigger: 'change' }],
-          jhshz: [{ required: true, message: '请选择计划审核组', trigger: 'change' }],
-          ms: [{ required: true, message: '请输入描述', trigger: 'blur' }],
+          // contractId: [{ required: true, message: '请选择合同', trigger: 'change' }],
+          // materialUrl: [{ required: true, message: '请选择附件', trigger: 'blur' }],
+          // materialName: [{ required: true, message: '请填写附件名称', trigger: 'change' }],
         }
       }
     },
-    created () {
-    },
     methods: {
-      //添加
-      onAdd(){
+      goBack() {
+        this.$router.go(-1)
+      },
+      //添加合同
+      onHtAdd(){
+        this.$refs.ruleForm.validate(valid => {
+          let params = {
+            materialName:this.form.materialName,
+            planId:this.planId,
+            contractId:this.form.contractId,
+          }
+          if (valid) {
+            insertPlanContract(params)
+              .then(res => {
+                if(res.code==2020200){
+                  console.log(res)
+                  this.queryPlanMaterialPage();
+                  this.htModalState = false;
+                  this.$message.info(res.message);
+                }else{
+                  this.$message.info(res.message);
+                }
+              })
+              .catch((e) => {
+                console.log(e)
+              })
+          } else {
+            return false;
+          }
+        });
+      },
+      //添加报告
+      onBgAdd(){
         this.$refs.ruleForm.validate(valid => {
           if (valid) {
-            // addUser(params)
-            //   .then(res => {
-            //     if(res.code==2020200){
-            //       console.log(res)
-            //       this.onSelectUserList();
-            //       this.updateModal = false;
-            //       this.$message.info(res.message);
-            //     }else{
-            //       this.$message.info(res.message);
-            //     }
-            //   })
-            //   .catch((e) => {
-            //     console.log(e)
-            //   })
+            if(this.fileRecordList==null||this.fileRecordList.length==0){
+              this.$message.info('请上传报告');
+              return false;
+            }
+            let params = {
+              materialName:this.form.materialName,
+              materialUrl: JSON.stringify(this.fileRecordList),
+              planId:this.planId
+            }
+            insertPlanReport(params)
+              .then(res => {
+                if(res.code==2020200){
+                  console.log(res)
+                  this.queryPlanMaterialPage();
+                  this.bgModalState = false;
+                  this.$message.info(res.message);
+                }else{
+                  this.$message.info(res.message);
+                }
+              })
+              .catch((e) => {
+                console.log(e)
+              })
           } else {
             return false;
           }
@@ -540,20 +384,6 @@
       onUpdate(){
         this.$refs.ruleForm.validate(valid => {
           if (valid) {
-            // updateUser(params)
-            //   .then(res => {
-            //     if(res.code==2020200){
-            //       console.log(res)
-            //       this.onSelectUserList();
-            //       this.updateModal = false;
-            //       this.$message.info(res.message);
-            //     }else{
-            //       this.$message.info(res.message);
-            //     }
-            //   })
-            //   .catch((e) => {
-            //     console.log(e)
-            //   })
           } else {
             return false;
           }
@@ -574,18 +404,205 @@
           pageNumber:1,
           pageSize:10
         },
-        defaultFileList,
+        ztList:['准备状态','申请施工状态','前期施工状态','申请中期施工', '中期施工状态','申请竣工状态' ,'竣工阶段'],
+        descriptions:{
+          contractNum:'' ,
+          endTime:'' ,
+          startTime:'',
+          id:'' ,
+          notApprovedNum:'' ,
+          planName:'' ,
+          planStage:'' ,
+          projectName:'' ,
+          reportNum:''
+        },
+        uploadColumns,
         columns,
         data,
+        uploading:false,
+        fileRecordList:[],
+        fileList:[],
+        contractInfoList:[]
       }
     },
     created () {
+      let obj = this.$route.query
+      this.planId = obj.id;
+      this.queryPlanDetail({id:this.planId})
+      this.queryContractInfoList();
+      this.queryPlanMaterialPage();
+      // this.queryApprovalStatus();
     },
     methods: {
+      queryApprovalStatus(){
+        queryApprovalStatus({id:this.planId})
+          .then(res=>{
+            if(res.code==2020200){
+              console.log('res-----')
+              console.log(res)
+            }else{
+              this.$message.info(res.message);
+            }
+          })
+          .catch((e)=>{
+            console.log(e)
+          })
+      },
+      applyNextPlanProcess(){
+        applyNextPlanProcess({id:this.planId})
+          .then(res=>{
+            if(res.code==2020200){
+              console.log(res)
+            }else{
+              this.$message.info(res.message);
+            }
+          })
+          .catch((e)=>{
+            console.log(e)
+          })
+      },
+      approvalNextPlanProcess(zt){
+        approvalNextPlanProcess({id:this.planId,approvalResult:zt})
+          .then(res=>{
+            if(res.code==2020200){
+              console.log(res)
+            }else{
+              this.$message.info(res.message);
+            }
+          })
+          .catch((e)=>{
+            console.log(e)
+          })
+      },
+      //查询合同全量
+      queryContractInfoList(){
+        queryContractInfoList()
+          .then(res=>{
+            if(res.code==2020200){
+              console.log(res)
+              this.contractInfoList = res.data;
+            }else{
+              this.$message.info(res.message);
+            }
+          })
+          .catch((e)=>{
+            console.log(e)
+          })
+      },
+      //查询合同报告列表
+      queryPlanMaterialPage(){
+        this.spinning = true
+        queryPlanMaterialPage(Object.assign(this.page,this.headerForm,{planId:this.planId}))
+          .then(res=>{
+            if(res.code==2020200){
+              console.log(res)
+              this.data = res.data.records;
+              this.total = res.data.total;
+              this.spinning = false
+            }else{
+              this.spinning = false
+              this.$message.info(res.message);
+            }
+          })
+          .catch((e)=>{
+            console.log(e)
+          })
+      },
+      //查询计划详情
+      queryPlanDetail(id){
+        queryPlanDetail(id)
+          .then(res => {
+            if(res.code==2020200){
+              this.descriptions.contractNum = res.data.contractNum;
+              this.descriptions.endTime= res.data.endTime;
+              this.descriptions.startTime= res.data.startTime;
+              this.descriptions.id= res.data.id;
+              this.descriptions.notApprovedNum= res.data.notApprovedNum;
+              this.descriptions.planName= res.data.planName;
+              this.descriptions.planStage= res.data.planStage;
+              this.descriptions.projectName= res.data.projectName;
+              this.descriptions.reportNum= res.data.reportNum;
+              this.pageHeadForm.title = res.data.planName;
+              // this.data = res.data.records;
+              // this.total = res.data.total;
+            }else{
+              this.$message.info(res.message);
+            }
+          })
+          .catch((e) => {
+            console.log(e)
+          })
+      },
+      //移除上传项
+      removeUpload(file){
+        const index = this.fileList.indexOf(file);
+        const newFileList = this.fileList.slice();
+        newFileList.splice(index, 1);
+        this.fileList = newFileList;
+      },
+      //上传前
+      beforeUpload(file) {
+        this.fileList = [...this.fileList, file];
+        return false;
+      },
+      //上传
+      upload(){
+        const { fileList } = this;
+        const formData = new FormData();
+        fileList.forEach(file => {
+          formData.append('file', file);
+        });
+        formData.append('type', '3');
+        this.uploading = true;
+        uploadReport(formData)
+          .then(res => {
+            if(res.code==2020200){
+              res.data.forEach((e)=>{
+                this.fileRecordList.push(e);
+              })
+              this.fileList = [];
+              this.uploading = false;
+              this.$message.info(res.message);
+            }else{
+              this.$message.info(res.message);
+            }
+          })
+          .catch((e) => {
+            console.log(e)
+          })
+      },
+      //删除已上传
+      deleteUpload(record){
+        for (let i = 0; i < this.fileRecordList.length; i++) {
+          if(this.fileRecordList[i].id == record.id){
+            this.fileRecordList.splice(i, 1);
+            i--;
+          }
+        }
+      },
+      //添加水印
+      transformFile(file) {
+        return new Promise(resolve => {
+          const reader = new FileReader();
+          reader.readAsDataURL(file);
+          reader.onload = () => {
+            const canvas = document.createElement('canvas');
+            const img = document.createElement('img');
+            img.src = reader.result;
+            img.onload = () => {
+              const ctx = canvas.getContext('2d');
+              ctx.drawImage(img, 0, 0);
+              ctx.fillStyle = 'red';
+              ctx.textBaseline = 'middle';
+              ctx.fillText('wlt', 20, 20);
+              canvas.toBlob(resolve);
+            };
+          };
+        });
+      },
       // 查看
       onView (record) {
-        console.log(record)
-        this.$router.push('/main/ControlProjectPlan/PlanApprove')
+        this.$router.push({path:'/main/ControlProjectPlan/PlanApprove',query: {id: record.id}})
       },
       // 修改
       onToUpdate (record) {
@@ -597,7 +614,7 @@
         //   this.form = {
         //     jhmc:res.data.jhmc,
         //     sjxm:res.data.sjxm,
-        //     kssj:res.data.kssj,
+        //     materialType:res.data.materialType,
         //     jssj:res.data.jssj,
         //     jhshz:res.data.jhshz,
         //     ms:res.data.ms,
@@ -625,7 +642,7 @@
   //vue实例
   export default {
     name: 'PlanDetails',
-    mixins: [cardMixins,tableMixins,modalMixins,formModeMixins,headMixins,pageHeadMixins,paginationMixins],
+    mixins: [tableMixins,modalMixins,formModeMixins,headMixins,pageHeadMixins,paginationMixins],
   }
 </script>
 

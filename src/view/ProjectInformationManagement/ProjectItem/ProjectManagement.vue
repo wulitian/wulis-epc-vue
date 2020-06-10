@@ -366,7 +366,7 @@
       onAdd(){
         this.$refs.ruleForm.validate(valid => {
           if (valid) {
-            insertEngineeringManage(Object.assign(this.form,{fileRecordList:this.fileRecordList}))
+            insertEngineeringManage(Object.assign(this.form,{accessoriesUrl:JSON.stringify(this.fileRecordList)}))
               .then(res => {
                 if(res.code==2020200){
                   this.queryEngineeringManagePage();
@@ -388,7 +388,7 @@
       onUpdate(){
         this.$refs.ruleForm.validate(valid => {
           if (valid) {
-            updateEngineeringManage(Object.assign(this.form,{id:this.id,fileRecordList:this.fileRecordList}))
+            updateEngineeringManage(Object.assign(this.form,{id:this.id,accessoriesUrl:JSON.stringify(this.fileRecordList)}))
               .then(res => {
                 if(res.code==2020200){
                   this.queryEngineeringManagePage();
@@ -425,6 +425,7 @@
         fileList.forEach(file => {
           formData.append('file', file);
         });
+        formData.append('type', '2');
         this.uploading = true;
         attachmentUpload(formData)
           .then(res => {
@@ -621,7 +622,7 @@
                 useId:res.data.useId+'',
               };
               this.id = res.data.id;
-              this.fileRecordList = res.data.fileRecordList;
+              this.fileRecordList = JSON.parse(res.data.accessoriesUrl)==null?[]:JSON.parse(res.data.accessoriesUrl);
             }else{
               this.$message.info(res.message);
             }

@@ -9,6 +9,9 @@ import './utils/request'
 import store from './store/'
 import './core/lazy_use'
 import './permission'
+// 时间插件
+import moment from 'moment';
+Vue.prototype.$moment = moment;
 import { Icon } from 'ant-design-vue'
 //自定义图标
 import iconFront from './utils/iconfont.js'

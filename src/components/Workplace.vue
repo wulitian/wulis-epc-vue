@@ -1,12 +1,10 @@
 <template>
   <div class="hello">
-    工作台
+    <img src="../../static/images/main.jpg" width="100%">
   </div>
 </template>
 
 <script>
-  import {getUserInfo,getToken} from "@/api/login";
-  import { mapActions } from 'vuex'
   export default {
   name: 'Workplace',
   data () {
@@ -14,32 +12,6 @@
 
     }
   },
-  created(){
-    this.gotoUserInfo();
-    this.gotoToken();
-    console.log('获取vuexgetUserName',this.$store.getters.getUserName)
-  },
-  methods:{
-    ...mapActions(['GetUserInfo', 'Login']),
-    gotoUserInfo(){
-      this.GetUserInfo()
-        .then((res) => console.log(res))
-        .catch(err => console.log(err))
-        .finally(() => {
-        })
-    },
-    gotoToken(){
-      let data = {
-        username:'admin',
-        password:'admin'
-      }
-      this.Login(data)
-        .then((res) => console.log(res))
-        .catch(err => console.log(err))
-        .finally(() => {
-        })
-    }
-  }
 }
 </script>
 

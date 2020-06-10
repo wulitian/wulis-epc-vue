@@ -49,3 +49,12 @@ export const queryFaxmList = () => {
     method: 'get',
   })
 }
+/**
+ * 查询可用项目列表
+ */
+export const queryFaxmAll = () => {
+  return axios({
+    url: '/web/epc/project/manage/queryProjectAll',
+    method: 'get',
+  })
+}

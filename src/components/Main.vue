@@ -69,7 +69,9 @@
     methods:{
       ...mapActions(['Logout']),
       getOpenKey(){
-        this.openkeys.push(this.$store.getters.routerList.find(item => item.id===(this.$store.getters.routerList.find(item => item.path === this.$route.path).parentId)).path);
+        if(this.$route.path!='/main/Workplace'){
+          this.openkeys.push(this.$store.getters.routerList.find(item => item.id===(this.$store.getters.routerList.find(item => item.path === this.$route.path).parentId)).path);
+        }
       },
       userLogout(){
         this.Logout()

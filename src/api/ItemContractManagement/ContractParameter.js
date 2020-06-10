@@ -33,12 +33,12 @@ export const queryContractInfoByid = (data) => {
 /**
  * 查询合同台账信息列表（全量）
  */
-// export const queryContractCategoryList = () => {
-//   return axios({
-//     url: '/web/pcm/contract/category/queryContractCategoryList',
-//     method: 'get',
-//   })
-// }
+export const queryContractInfoList = () => {
+  return axios({
+    url: '/web/pcm/contract/info/queryContractInfoList',
+    method: 'get',
+  })
+}
 /**
  * 查询合同台账信息列表（分页）
  */
@@ -63,7 +63,7 @@ export const updateContractInfo = (data) => {
  */
 export const attachmentUpload = (data) => {
   return axios({
-    url: '/web/pcm/contract/info/uploadContractInfo',
+    url: '/web/cmi/file/upload',
     data:data,
     method: 'post',
   })

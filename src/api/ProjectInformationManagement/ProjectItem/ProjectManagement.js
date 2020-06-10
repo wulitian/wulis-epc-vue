@@ -26,7 +26,7 @@ export const updateEngineeringManage = (data) => {
  */
 export const attachmentUpload = (data) => {
   return axios({
-    url: '/web/epc/engineering/manage/attachmentUpload',
+    url: '/web/cmi/file/upload',
     method: 'post',
     data:data
   })
