@@ -5,6 +5,12 @@ export const baseRouterMap = [
     name: 'Login',
     component: () => import('@/components/Login'),
   },
+  {
+    path: '/Exception404',
+    name: 'Exception404',
+    component: () => import('@/components/404'),
+    meta: { title: '404'}
+  },
 ]
 //异步路由
 export const asyncRouterMap = [

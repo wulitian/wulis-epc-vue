@@ -10,6 +10,10 @@ const rootRouter = {
   meta: {title: '首页'},
   children: []
 }
+// 前端未找到页面路由（固定不用改）
+const notFoundRouter = {
+  path: '*', redirect: '/Exception404', hidden: true
+}
 /**
  * 动态生成菜单
  * @param token
@@ -52,6 +56,7 @@ export const generatorDynamicRouter = () => {
         rootRouter.children = childrenNav
         menuNav.push(rootRouter)
         const routers = generator(menuNav)
+        routers.push(notFoundRouter)
         let routerAll = {}
         routerAll.routers = routers;
         routerAll.routerList = routerList;

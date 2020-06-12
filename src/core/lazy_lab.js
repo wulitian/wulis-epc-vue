@@ -62,6 +62,7 @@ import {
   PageHeader,
   FormModel,
   descriptions,
+  Result,
 } from 'ant-design-vue';
 
 Vue.prototype.$message = message;
@@ -133,3 +134,4 @@ Vue.use(Empty);
 Vue.use(PageHeader);
 Vue.use(FormModel);
 Vue.use(descriptions);
+Vue.use(Result);
