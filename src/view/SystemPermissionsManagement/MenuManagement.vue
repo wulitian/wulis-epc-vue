@@ -37,7 +37,7 @@
            菜单
         </a-tag>
         <a-tag color="green" v-if="menuType==1">
-           按钮
+           权限
         </a-tag>
       </span>
       <span slot="icon" slot-scope="icon">
@@ -46,10 +46,10 @@
       </span>
       <span slot="enable" slot-scope="enable">
          <a-tag color="orange" v-if="enable==0">
-           禁用
+           隐藏
         </a-tag>
         <a-tag color="blue" v-if="enable==1">
-           启用
+           显示
         </a-tag>
       </span>
       <span slot="hiddenHeaderContent" slot-scope="hiddenHeaderContent">
@@ -192,7 +192,7 @@
             </a-form-model-item>
           </a-col>
           <a-col :span="12">
-            <a-form-model-item label="启用状态" prop="enable">
+            <a-form-model-item label="菜单显示" prop="enable">
               <a-radio-group v-model="form.enable">
                 <a-radio :value="0">
                   否
@@ -239,7 +239,7 @@
             </a-form-model-item>
           </a-col>
           <a-col :span="12">
-            <a-form-model-item label="启用状态" prop="enable">
+            <a-form-model-item label="菜单显示" prop="enable">
               <a-radio-group v-model="form.enable">
                 <a-radio :value="0">
                   否

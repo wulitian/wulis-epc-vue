@@ -22,7 +22,7 @@
       </a-col>
       <span style="margin-left: 10px">
         <a-button type="primary" @click="onSearch">查询</a-button>
-        <a-button type="primary" @click="onToAdd" v-if="hasPermission('xmjhkz::add')">新增</a-button>
+        <a-button type="primary" @click="onToAdd" v-if="hasPermission('web:ppc:plan:insertPlan')">新增</a-button>
       </span>
     </div>
     <!-- 列表 -->
@@ -47,10 +47,10 @@
       </span>
       <span slot="action" slot-scope="text, record">
         <a @click="onView(record)">查看</a>
-        <a-divider type="vertical" v-if="hasPermission('xmjhkz::update')"/>
-        <a @click="onToUpdate(record)" v-if="hasPermission('xmjhkz::update')">修改</a>
-        <a-divider type="vertical" v-if="hasPermission('xmjhkz::delete')"/>
-        <a-popconfirm title="你确定删除吗？" ok-text="确定" cancel-text="取消" v-if="hasPermission('xmjhkz::delete')" @confirm="onDeleteConfirm(record)" @cancel="onDeleteCancel">
+        <a-divider type="vertical" v-if="hasPermission('web:ppc:plan:updatePlan')"/>
+        <a @click="onToUpdate(record)" v-if="hasPermission('web:ppc:plan:updatePlan')">修改</a>
+        <a-divider type="vertical" v-if="hasPermission('web:ppc:plan:deletePlan')"/>
+        <a-popconfirm title="你确定删除吗？" ok-text="确定" cancel-text="取消" v-if="hasPermission('web:ppc:plan:deletePlan')" @confirm="onDeleteConfirm(record)" @cancel="onDeleteCancel">
           <a href="#">删除</a>
         </a-popconfirm>
       </span>

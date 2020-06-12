@@ -115,10 +115,13 @@
     <div style="text-align: center;margin-top: 10px">
       <a-button type="primary" @click="goBack">
         返回
-      </a-button>
-      <a-button type="primary" @click="onSave" v-if="addStatus">
+      </a-button>web:ppc:review:team:insertReviewTeam
+      <span v-if="hasPermission('web:ppc:review:team:insertReviewTeam')">
+        <a-button type="primary" @click="onSave" v-if="addStatus" >
         添加
       </a-button>
+      </span>
+
       <a-button type="primary" @click="onUpdate" v-else>
         修改
       </a-button>

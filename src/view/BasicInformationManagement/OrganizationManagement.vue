@@ -25,7 +25,6 @@
         </div>
       </a-col>
       <span style="margin-left: 10px">
-         <!--v-if="hasPermission('update')-->
         <a-button type="primary" @click="onSearch" >查询</a-button>
         <a-button type="primary" @click="onToAdd" >新增</a-button>
       </span>
@@ -66,7 +65,14 @@
           <a-input v-model="form.organizationName" placeholder="请输入用户名称"/>
         </a-form-model-item>
         <a-form-model-item label="是否启用" prop="enable">
-          <a-switch v-model="form.enable" />
+          <a-radio-group v-model="form.enable">
+            <a-radio :value="0">
+              否
+            </a-radio>
+            <a-radio :value="1">
+              是
+            </a-radio>
+          </a-radio-group>
         </a-form-model-item>
         <a-form-model-item :wrapper-col="{ span: 14, offset: 4 }">
           <a-button type="primary" @click="onAdd" v-if="addStatus">
@@ -101,8 +107,6 @@
         }
       }
     },
-    created () {
-    },
     methods: {
       // 搜索
       onSearch () {
@@ -113,8 +117,7 @@
         this.modalTitle='新建机构',
         this.addStatus = true;
         this.modalState = true
-        this.form.organizationName = '',
-        this.form.enable = false
+        this.form.organizationName = ''
       },
     }
   };
@@ -161,7 +164,7 @@
         this.modalTitle = '修改机构';
         this.addStatus = false;
         this.form.organizationName = record.organizationName;
-        this.form.enable = record.enable==1?true:false;
+        this.form.enable = record.enable;
         this.id = record.id;
       },
       // 删除确认
@@ -192,8 +195,6 @@
         total:0
       }
     },
-    created () {
-    },
     methods: {
       // 分页页码改变
       onPaginationChange (pageNumber, pageSize) {
@@ -217,10 +218,6 @@
         modalState:false
       }
     },
-    created () {
-    },
-    methods: {
-    }
   };
   //表单混入
   const formModeMixins = {
@@ -232,15 +229,13 @@
         id:'',
         form:{
           organizationName:'',
-          enable:false,
+          enable:1,
         },
         rules: {
           organizationName: [{ required: true, message: '请输入机构名称', trigger: 'blur' }],
           enable: [{ required: true, message: '请选择启用状态', trigger: 'change' }],
         }
       }
-    },
-    created () {
     },
     methods: {
       //添加
@@ -249,7 +244,7 @@
           if (valid) {
             let params = {
               organizationName:this.form.organizationName,
-              enable:this.enable?1:0
+              enable:this.form.enable,
             };
             insertOrganization(params)
               .then(res => {
@@ -273,7 +268,7 @@
         const params = {
           id:this.id,
           organizationName:this.form.organizationName,
-          enable:this.form.enable?1:0,
+          enable:this.form.enable,
         };
         updateOrganization(params)
           .then(res => {
@@ -304,10 +299,6 @@
         spinning:false
       }
     },
-    created(){
-    },
-    methods:{
-    }
   }
 </script>
 

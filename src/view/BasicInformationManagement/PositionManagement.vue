@@ -65,7 +65,14 @@
           <a-input v-model="form.positionName" placeholder="请输入职位名称"/>
         </a-form-model-item>
         <a-form-model-item label="是否启用" prop="enable">
-          <a-switch v-model="form.enable" />
+          <a-radio-group v-model="form.enable">
+            <a-radio :value="0">
+              否
+            </a-radio>
+            <a-radio :value="1">
+              是
+            </a-radio>
+          </a-radio-group>
         </a-form-model-item>
         <a-form-model-item :wrapper-col="{ span: 14, offset: 4 }">
           <a-button type="primary" @click="onAdd" v-if="addStatus">
@@ -113,15 +120,11 @@
       },
       // 去添加
       onToAdd () {
-        this.initparameters();
         this.modalTitle='新建职位',
         this.addStatus = true;
         this.modalState = true
-      },
-      // 初始化参数
-      initparameters(){
         this.form.positionName = '',
-        this.form.enable = false
+        this.form.enable = 1
       }
     }
   };
@@ -169,7 +172,7 @@
         this.modalTitle = '修改职位';
         this.addStatus = false;
         this.form.positionName = record.positionName;
-        this.form.enable = record.enable==1?true:false;
+        this.form.enable = record.enable;
         this.id = record.id;
       },
       // 删除确认
@@ -240,7 +243,7 @@
         id:'',
         form:{
           positionName:'',
-          enable:false,
+          enable:1,
         },
         rules: {
           positionName: [{ required: true, message: '请输入职位名称', trigger: 'blur' }],
@@ -257,7 +260,7 @@
           if (valid) {
             let params = {
               positionName:this.form.positionName,
-              enable:this.enable?1:0
+              enable:this.form.enable
             };
             insertPosition(params)
               .then(res => {
@@ -281,7 +284,7 @@
         const params = {
           id:this.id,
           positionName:this.form.positionName,
-          enable:this.form.enable?1:0,
+          enable:this.form.enable,
         };
         updatePosition(params)
           .then(res => {

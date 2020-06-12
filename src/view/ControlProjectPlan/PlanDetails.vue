@@ -6,23 +6,23 @@
       @back="() => $router.go(-1)"
     >
       <template slot="extra">
-        <a-button key="1" v-if="hasPermission('xmjhkz::kssg')&&descriptions.planStage==0" @click="applyNextPlanProcess">
+        <a-button key="1" v-if="hasPermission('web:ppc:plan:detail:applyNextPlanProcess')&&descriptions.planStage==0" @click="applyNextPlanProcess">
           开始施工
         </a-button>
         <span v-if="descriptions.planStage==1">申请施工状态</span>
-        <a-button key="2" v-if="hasPermission('xmjhkz::zqsg')&&descriptions.planStage==2" @click="applyNextPlanProcess">
+        <a-button key="2" v-if="hasPermission('web:ppc:plan:detail:applyNextPlanProcess')&&descriptions.planStage==2" @click="applyNextPlanProcess">
           中期施工
         </a-button>
         <span v-if="descriptions.planStage==3">申请中期施工</span>
-        <a-button key="3" v-if="hasPermission('xmjhkz::jsjg')&&descriptions.planStage==4" @click="applyNextPlanProcess">
+        <a-button key="3" v-if="hasPermission('web:ppc:plan:detail:applyNextPlanProcess')&&descriptions.planStage==4" @click="applyNextPlanProcess">
           结束竣工
         </a-button>
         <span v-if="descriptions.planStage==5">申请竣工状态</span>
         <span v-if="descriptions.planStage==6">竣工阶段</span>
-        <a-button key="4" type="primary" v-if="hasPermission('xmjhkz;;jhxq::bh')" @click="approvalNextPlanProcess('0')">
+        <a-button key="4" type="primary" v-if="hasPermission('web:ppc:plan:detail:approvalNextPlanProcess')" @click="approvalNextPlanProcess('0')">
           驳回
         </a-button>
-        <a-button key="5" type="primary" v-if="hasPermission('xmjhkz;;jhxq::ty')" @click="approvalNextPlanProcess('1')">
+        <a-button key="5" type="primary" v-if="hasPermission('web:ppc:plan:detail:approvalNextPlanProcess')" @click="approvalNextPlanProcess('1')">
           同意
         </a-button>
       </template>
@@ -67,14 +67,22 @@
       </a-col>
       <span style="margin-left: 10px">
         <a-button type="primary" @click="onSearch">查询</a-button>
-        <a-button type="primary" @click="onToAddHt" v-if="hasPermission('xmjhkz::xzht')" >新增合同</a-button>
-        <a-button type="primary" @click="onToAddBg" v-if="hasPermission('xmjhkz::xzbg')" >新增报告</a-button>
+        <a-button type="primary" @click="onToAddHt" v-if="hasPermission('web:ppc:plan:detail:insertPlanContract')" >新增合同</a-button>
+        <a-button type="primary" @click="onToAddBg" v-if="hasPermission('web:ppc:plan:detail:insertPlanReport')" >新增报告</a-button>
       </span>
     </div>
     <!-- 列表 -->
     <a-spin :spinning="spinning">
       <a-table :rowClassName="(record, index)=>{return index % 2 === 1? 'odd' : 'even'}" bordered :columns="columns" rowKey="id" :data-source="data" :pagination="false">
-      <span slot="action" slot-scope="text, record">
+      <span slot="materialType" slot-scope="materialType">
+         <a-tag color="green" v-if="materialType==0">
+           报告
+        </a-tag>
+        <a-tag color="pink" v-if="materialType==1">
+          合同
+        </a-tag>
+      </span>
+        <span slot="action" slot-scope="text, record">
         <a @click="onView(record)">查看</a>
       </span>
       </a-table>
@@ -183,7 +191,7 @@
   const columns = [
     { title: '任务名称',dataIndex: 'materialName',key: 'materialName' },
     { title: '发起人',dataIndex: 'userName',key: 'userName' },
-    { title: '材料类型',dataIndex: 'materialType',key: 'materialType' },
+    { title: '材料类型',dataIndex: 'materialType',key: 'materialType' ,scopedSlots: { customRender: 'materialType' },},
     { title: '开始时间',dataIndex: 'createTime',key: 'createTime' },
     { title: '审核状态',dataIndex: 'auditState',key: 'auditState' },
     { title: '操作',dataIndex: 'action', scopedSlots: { customRender: 'action' } },
@@ -422,7 +430,8 @@
         uploading:false,
         fileRecordList:[],
         fileList:[],
-        contractInfoList:[]
+        contractInfoList:[],
+        queryApprovalStatus:''
       }
     },
     created () {
@@ -431,13 +440,14 @@
       this.queryPlanDetail({id:this.planId})
       this.queryContractInfoList();
       this.queryPlanMaterialPage();
-      // this.queryApprovalStatus();
+      this.queryApprovalStatus();
     },
     methods: {
       queryApprovalStatus(){
         queryApprovalStatus({id:this.planId})
           .then(res=>{
             if(res.code==2020200){
+              this.queryApprovalStatus = res.data;
               console.log('res-----')
               console.log(res)
             }else{

@@ -89,6 +89,16 @@
         <a-form-model-item label="备注" prop="remark">
           <a-textarea placeholder="请输入备注" :rows="4" v-model="form.remark"/>
         </a-form-model-item >
+        <a-form-model-item label="权限选择">
+          <a-radio-group @change="selectMenu">
+            <a-radio :value="1">
+              全选
+            </a-radio>
+            <a-radio :value="0">
+              全不选
+            </a-radio>
+          </a-radio-group>
+        </a-form-model-item >
         <a-form-model-item label="菜单权限" prop="menuIds">
           <a-tree
             v-model="form.menuIds"
@@ -116,6 +126,7 @@
 </template>
 
 <script>
+  import Vue from 'vue'
   import {deleteRoleByid,insertRole,queryRoleByid,queryRoleList,queryRolePage,updateRole} from "@/api/SystemPermissionsManagement/RoleManagement";
   import {queryMenuTree} from "@/api/SystemPermissionsManagement/MenuManagement";
   const columns = [
@@ -229,8 +240,9 @@
               this.form.sort = res.data.sort;
               this.form.remark = res.data.remark;
               this.form.enable = res.data.enable;
-              this.form.menuIds.checked = res.data.menuIds.map(String)
+              this.form.menuIds.checked = res.data.menuIds.map(String);
               this.id = record.id;
+              console.log(this.form.menuIds.checked)
             }else{
               this.$message.info(res.message);
             }
@@ -305,6 +317,7 @@
         labelCol: { span: 8 },
         wrapperCol: { span: 14 },
         id:'',
+        checkedAll:[],
         form:{
           roleName:'',
           roleMark:'',
@@ -312,7 +325,7 @@
           remark:'',
           enable:1,
           menuIds:{
-            checked:[]
+            checked:[],
           }
         },
         rules: {
@@ -325,6 +338,15 @@
     created () {
     },
     methods: {
+      //是否全选
+      selectMenu(e){
+        if(e.target.value=='1'){
+          this.form.menuIds.checked = this.checkedAll.map(String);
+        }else{
+          this.form.menuIds.checked = [];
+        }
+        this.$forceUpdate()
+      },
       //添加
       onAdd(){
         this.$refs.ruleForm.validate(valid => {
@@ -355,6 +377,7 @@
           }
         });
       },
+      //修改
       onUpdate(){
         let params = {
           roleName:this.form.roleName,
@@ -416,6 +439,7 @@
             data[i].title = data[i].menuName;
             data[i].value = data[i].id;
             data[i].key = data[i].id;
+            this.checkedAll.push(data[i].id);
             if(data[i].nodes&&data[i].nodes.length>0){
               data[i].children = data[i].nodes;
               this.getTree(data[i].nodes)

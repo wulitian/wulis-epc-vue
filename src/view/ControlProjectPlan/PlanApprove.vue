@@ -65,7 +65,8 @@
         {{form.remarks}}
       </a-descriptions-item>
       <a-descriptions-item label="相关附件">
-        相关附件
+        <a-table :rowClassName="(record, index)=>{return index % 2 === 1? 'odd' : 'even'}" bordered :columns="uploadColumns" rowKey="id" :data-source="accessoriesUrl" :pagination="false">
+        </a-table>
       </a-descriptions-item>
     </a-descriptions>
     <a-descriptions v-else title="报告信息" size="small" bordered>
@@ -73,7 +74,8 @@
         {{form.materialName}}
       </a-descriptions-item>
       <a-descriptions-item label="相关附件">
-        相关附件
+        <a-table :rowClassName="(record, index)=>{return index % 2 === 1? 'odd' : 'even'}" bordered :columns="uploadColumns" rowKey="id" :data-source="materialUrl" :pagination="false">
+        </a-table>
       </a-descriptions-item>
     </a-descriptions>
     <a-steps :current="1" style="margin: 20px 0">
@@ -125,11 +127,23 @@
     </a-modal>
     <!-- 操作 -->
     <div style="text-align: center;margin-top: 10px">
-      <a-button type="primary" @click="goBack">
-        返回
-      </a-button>
-      <a-button type="primary" @click="onToApprove" v-if="approvalResult==0">
-        审批
+
+      <span v-if="hasPermission('web:ppc:plan:approval:queryMaterialReviewStatus')">
+        <span v-if="hasPermission('web:ppc:plan:approval:materialReview')">
+           <a-button type="primary" @click="goBack">
+            返回
+          </a-button>
+          <a-button  v-if="approvalResult=='-1'">
+            已驳回
+          </a-button>
+           <a-button type="primary" @click="onToApprove" v-if="approvalResult=='0'">
+            审批
+          </a-button>
+        </span>
+      </span>
+
+      <a-button  v-if="approvalResult=='1'">
+        已同意
       </a-button>
     </div>
   </div>
@@ -158,12 +172,19 @@
       }
     },
   };
+  const uploadColumns = [
+    { title: '文件名称',dataIndex: 'fileName',key: 'fileName' ,width:100},
+    { title: '文件路径',dataIndex: 'fileUrl',key: 'fileUrl',width:100},
+    { title: '文件大小',dataIndex: 'fileSize',key: 'fileSize',width:100},
+    { title: '文件类型',dataIndex: 'fileExt',key: 'fileExt' ,width:100},
+  ];
   //列表混入
   const tableMixins = {
     data () {
       return {
         spinning:false,
         columns,
+        uploadColumns,
         data:[],
       }
     },
@@ -215,7 +236,9 @@
       total:0,
       contractor:{},
       approvalNodes:[],
-      approvalResult:''
+      approvalResult:'',
+      materialUrl:[],
+      accessoriesUrl:[],
     }
   },
   created(){
@@ -236,6 +259,8 @@
             console.log(res)
             this.form = res.data;
             this.materialType = res.data.materialType;
+            this.materialUrl = JSON.parse(res.data.materialUrl)==null?[]:JSON.parse(res.data.materialUrl);
+            this.accessoriesUrl = JSON.parse(res.data.accessoriesUrl)==null?[]:JSON.parse(res.data.accessoriesUrl);
             this.spinning = false;
           }else{
             this.$message.info(res.message);
@@ -286,7 +311,7 @@
       queryMaterialReviewStatus({id:this.id})
         .then(res => {
           if(res.code==2020200){
-            this.approvalResult = res.data.approvalResult;
+            this.approvalResult = res.data;
             console.log(res)
           }else{
             this.$message.info(res.message);
@@ -316,6 +341,7 @@
               if(res.code==2020200){
                 console.log(res);
                 this.modalState = false;
+                this.queryMaterialReviewStatus();
                 this.$message.info(res.message);
               }else{
                 this.modalState = false;

@@ -75,7 +75,7 @@
         :wrapper-col="wrapperCol"
       >
         <a-form-model-item label="所属机构" prop="organizationId">
-          <a-select style="width: 100%;" v-model="form.organizationId">
+          <a-select style="width: 100%;" v-model="form.organizationId" @change="organizationChange">
             <a-select-option v-for="item in organizationList" :value="item.id" :key="item.id">
               <a-tooltip>
                 <template slot="title">
@@ -86,7 +86,7 @@
             </a-select-option>
           </a-select>
         </a-form-model-item>
-        <a-form-model-item label="上级部门" prop="parentId">
+        <a-form-model-item label="上级部门" prop="parentId" >
           <a-tree-select
             v-model="form.parentId"
             style="width: 100%"
@@ -167,7 +167,7 @@
           parentId:'',
           departmentName:'',
           sort:0,
-          enable:0
+          enable:1
         }
       }
     }
@@ -184,7 +184,6 @@
     },
     created () {
       this.queryDepartmentTreeFun();
-      this.queryDepartmentTreeSelect();
       this.queryOrganizationList();
     },
     methods: {
@@ -205,13 +204,15 @@
             console.log(e)
           })
       },
-      //查询部门树
-      queryDepartmentTreeSelect(){
-        queryDepartmentTree()
+      //机构点击
+      organizationChange(id){
+        queryDepartmentTree({organizationId:id})
           .then(res => {
             if(res.code==2020200){
+              this.form.parentId = '';
               this.selectTreeData = res.data;
               this.getTree(this.selectTreeData);
+              console.log(res.data)
             }else{
               this.$message.info(res.message);
             }
@@ -247,11 +248,23 @@
           .then(res => {
             if(res.code==2020200){
               this.form.organizationId= res.data.organizationId+'';
-              this.form.parentId= res.data.parentId;
-              this.form.departmentName= res.data.departmentName;
-              this.form.sort= res.data.sort;
-              this.form.enable= res.data.enable;
-              this.id = res.data.id;
+              queryDepartmentTree({organizationId:this.form.organizationId})
+                .then(res2 => {
+                  if(res2.code==2020200){
+                    this.selectTreeData = res2.data;
+                    this.getTree(this.selectTreeData);
+                    this.form.parentId= res.data.parentId==0?'':res.data.parentId;
+                    this.form.departmentName= res.data.departmentName;
+                    this.form.sort= res.data.sort;
+                    this.form.enable= res.data.enable;
+                    this.id = res.data.id;
+                  }else{
+                    this.$message.info(res2.message);
+                  }
+                })
+                .catch((e) => {
+                  console.log(e)
+                })
             }else{
               this.$message.info(res.message);
             }
@@ -266,7 +279,6 @@
           .then(res => {
             if(res.code==2020200){
               this.queryDepartmentTreeFun();
-              this.queryDepartmentTreeSelect();
               this.$message.info(res.message);
             }else{
               this.$message.info(res.message);
@@ -290,10 +302,6 @@
         modalState:false
       }
     },
-    created () {
-    },
-    methods: {
-    }
   };
   //表单混入
   const formModeMixins = {
@@ -308,11 +316,10 @@
           parentId:'',
           departmentName:'',
           sort:0,
-          enable:0
+          enable:1
         },
         rules: {
           organizationId: [{ required: true, message: '请输入所属机构', trigger: 'blur' }],
-          parentId: [{ required: true, message: '请选择上级部门', trigger: 'change' }],
           departmentName: [{ required: true, message: '请输入部门名称', trigger: 'blur' }],
         }
       }
@@ -324,11 +331,17 @@
       onAdd(){
         this.$refs.ruleForm.validate(valid => {
           if (valid) {
-            insertDepartment(this.form)
+            let params = {
+                organizationId:this.form.organizationId,
+                parentId:(this.form.parentId==''?'0':this.form.parentId),
+                departmentName:this.form.departmentName,
+                sort:this.form.sort,
+                enable:this.form.enable,
+            };
+            insertDepartment(params)
               .then(res => {
                 if(res.code==2020200){
                   this.queryDepartmentTreeFun();
-                  this.queryDepartmentTreeSelect();
                   this.modalState = false;
                 }else{
                   this.$message.info(res.message);
@@ -345,11 +358,18 @@
       onUpdate(){
         this.$refs.ruleForm.validate(valid => {
           if (valid) {
-            updateDepartment(Object.assign(this.form,{id:this.id}))
+            let params = {
+              organizationId:this.form.organizationId,
+              parentId:(this.form.parentId==''?'0':this.form.parentId),
+              departmentName:this.form.departmentName,
+              sort:this.form.sort,
+              enable:this.form.enable,
+              id:this.id
+            };
+            updateDepartment(params)
               .then(res => {
                 if(res.code==2020200){
                   this.queryDepartmentTreeFun();
-                  this.queryDepartmentTreeSelect();
                   this.modalState = false;
                 }else{
                   this.modalState = false;

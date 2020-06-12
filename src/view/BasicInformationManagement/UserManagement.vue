@@ -528,22 +528,22 @@
           account: [{ required: true, message: '请输入账号', trigger: 'blur' },{ min: 6, max: 12, message: '账号长度在6至12位', trigger: 'blur' }],
           userName: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
           phoneNumber: [{ required: true, message: '请输入电话号', trigger: 'blur' },{validator: this.phoneNumberCheck}],
-          mail: [{type: 'email',required: true,message: '请填写正确的邮箱',trigger: 'blur',}],
+          // mail: [{type: 'email',required: true,message: '请填写正确的邮箱',trigger: 'blur',}],
           organizationId: [{required: true,message: '请选择所属企业',trigger: 'change',}],
           departmentId: [{required: true,message: '请选择所属部门',trigger: 'change',}],
           positionId: [{required: true,message: '请选择职位',trigger: 'change',}],
-          roleIds: [{type: 'array',required: true,message: '请配置角色',trigger: 'change',}]
+          // roleIds: [{type: 'array',required: true,message: '请配置角色',trigger: 'change',}]
         },
         rulesAdd: {
           account: [{ required: true, message: '请输入账号', trigger: 'blur' },{ min: 6, max: 12, message: '账号长度在6至12位', trigger: 'blur' }],
           userName: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
           password: [{ required: true, message: '请输入密码', trigger: 'blur' },{ min: 6, max: 20, message: '账号长度在6至20位', trigger: 'blur' }],
           phoneNumber: [{ required: true, message: '请输入电话号', trigger: 'blur' },{validator: this.phoneNumberCheck}],
-          mail: [{type: 'email',required: true,message: '请填写正确的邮箱',trigger: 'blur',}],
+          // mail: [{type: 'email',required: true,message: '请填写正确的邮箱',trigger: 'blur',}],
           organizationId: [{required: true,message: '请选择所属企业',trigger: 'change',}],
           departmentId: [{required: true,message: '请选择所属部门',trigger: 'change',}],
           positionId: [{required: true,message: '请选择职位',trigger: 'change',}],
-          roleIds: [{type: 'array',required: true,message: '请配置角色',trigger: 'change',}]
+          // roleIds: [{type: 'array',required: true,message: '请配置角色',trigger: 'change',}]
         }
       }
     },

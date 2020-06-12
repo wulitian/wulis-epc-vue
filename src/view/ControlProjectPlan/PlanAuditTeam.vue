@@ -39,9 +39,9 @@
     <a-spin :spinning="spinning">
       <a-table :rowClassName="(record, index)=>{return index % 2 === 1? 'odd' : 'even'}" bordered :columns="columns" rowKey="id" :data-source="data" :pagination="false">
       <span slot="action" slot-scope="text, record">
-        <a @click="onToUpdate(record)">修改</a>
+        <a @click="onToUpdate(record)" v-if="hasPermission('web:ppc:review:team:updateReviewTeam')">修改</a>
         <a-divider type="vertical" />
-        <a-popconfirm title="你确定删除吗？" ok-text="确定" cancel-text="取消" @confirm="onDeleteConfirm(record)" @cancel="onDeleteCancel">
+        <a-popconfirm title="你确定删除吗？" v-if="hasPermission('web:ppc:review:team:deleteReviewTeam')" ok-text="确定" cancel-text="取消" @confirm="onDeleteConfirm(record)" @cancel="onDeleteCancel">
           <a href="#">删除</a>
         </a-popconfirm>
       </span>

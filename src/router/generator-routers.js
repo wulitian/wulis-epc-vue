@@ -3,13 +3,11 @@ import store from '@/store'
 import { ACCESS_TOKEN } from '@/store/mutation-types'
 // 根级菜单
 const rootRouter = {
-  name: 'main',
+  name: 'BlankLayout',
   path: '/',
   component: 'components/BlankLayout',
   redirect: '/main',
-  meta: {
-    title: '首页'
-  },
+  meta: {title: '首页'},
   children: []
 }
 /**
@@ -60,8 +58,6 @@ export const generatorDynamicRouter = () => {
         routerAll.permissionMarkList = permissionMarkList;
         resolve(routerAll)
     }).catch(err => {
-      // Vue.ls.remove(ACCESS_TOKEN)
-      // this.$router.push("/login")
       store.dispatch('Logout').then(() => {
         setTimeout(() => {
           window.location.reload()
