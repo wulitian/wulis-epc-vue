@@ -181,6 +181,8 @@
             <a-table :rowClassName="(record, index)=>{return index % 2 === 1? 'odd' : 'even'}" bordered :columns="uploadColumns" rowKey="id" :data-source="fileRecordList" :pagination="false">
               <span slot="action" slot-scope="text, record">
                   <a href="#" @click="deleteUpload(record)">删除</a>
+                  <a-divider type="vertical" />
+                  <a :href="record.fileUrl" :download="record.fileName" target="_blank">下载</a>
               </span>
             </a-table>
           </a-form-model-item>
@@ -622,7 +624,7 @@
                 useId:res.data.useId+'',
               };
               this.id = res.data.id;
-              this.fileRecordList = JSON.parse(res.data.accessoriesUrl)==null?[]:JSON.parse(res.data.accessoriesUrl);
+              this.fileRecordList = res.data.accessoriesUrl==null?[]:JSON.parse(res.data.accessoriesUrl);
             }else{
               this.$message.info(res.message);
             }

@@ -50,6 +50,15 @@ export const queryFaxmList = () => {
   })
 }
 /**
+ * 查询项目列表(用户企业被分配项目)
+ */
+export const queryProjectList = () => {
+  return axios({
+    url: '/web/epc/project/manage/queryProjectList',
+    method: 'get',
+  })
+}
+/**
  * 查询可用项目列表
  */
 export const queryFaxmAll = () => {

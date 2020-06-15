@@ -122,17 +122,17 @@
           </a-col>
           <a-col :span="8">
             <a-form-model-item label="合同金额（元）" prop="contractAmount">
-              <a-input v-model="form.contractAmount"/>
+              <a-input-number  v-model="form.contractAmount" :min="0" :max="100000000" placeholder="请输入合同金额" style="width: 100%;"/>
             </a-form-model-item>
           </a-col>
           <a-col :span="8">
             <a-form-model-item label="质保期（年）" prop="warrantyPeriod">
-              <a-input v-model="form.warrantyPeriod"/>
+              <a-input-number  v-model="form.warrantyPeriod" :min="0" :max="100" placeholder="请输入质保期" style="width: 100%;"/>
             </a-form-model-item>
           </a-col>
           <a-col :span="8">
             <a-form-model-item label="质保金比例（%）" prop="retentionMoneyProportion">
-              <a-input v-model="form.retentionMoneyProportion"/>
+              <a-input-number  v-model="form.retentionMoneyProportion" :min="0" :max="100" placeholder="请输入质保金比例" style="width: 100%;"/>
             </a-form-model-item>
           </a-col>
           <a-col :span="8">
@@ -164,7 +164,7 @@
           </a-col>
           <a-col :span="8">
             <a-form-model-item label="付款达到（%）" prop="paymentRate">
-              <a-input v-model="form.paymentRate"/>
+              <a-input-number  v-model="form.paymentRate" :min="0" :max="100" placeholder="请输入付款达到" style="width: 100%;"/>
             </a-form-model-item>
           </a-col>
           <a-col :span="8">
@@ -181,7 +181,7 @@
           </a-col>
           <a-col :span="8">
             <a-form-model-item label="预警天数" prop="alertDays">
-              <a-input v-model="form.alertDays"/>
+              <a-input-number  v-model="form.alertDays" :min="0" :max="36000" placeholder="请输入预警天数" style="width: 100%;"/>
             </a-form-model-item>
           </a-col>
           <a-col :span="8">
@@ -196,7 +196,7 @@
           </a-col>
           <a-col :span="8">
             <a-form-model-item label="提成比例" prop="percentage">
-              <a-input v-model="form.percentage"/>
+              <a-input-number  v-model="form.percentage" :min="0" :max="100" placeholder="请输入提成比例" style="width: 100%;"/>
             </a-form-model-item>
           </a-col>
           <a-col :span="8">
@@ -217,6 +217,8 @@
             <a-table :rowClassName="(record, index)=>{return index % 2 === 1? 'odd' : 'even'}" bordered :columns="uploadColumns" rowKey="id" :data-source="fileRecordList" :pagination="false">
               <span slot="action" slot-scope="text, record">
                   <a href="#" @click="deleteUpload(record)">删除</a>
+                  <a-divider type="vertical" />
+                  <a :href="record.fileUrl" :download="record.fileName" target="_blank">下载</a>
               </span>
             </a-table>
           </a-form-model-item>
@@ -261,9 +263,9 @@
 <script>
   import {attachmentUpload,deleteContractInfoByid,insertContractInfo,queryContractInfoByid,queryContractInfoPage,updateContractInfo} from "@/api/ItemContractManagement/ContractParameter";
   import {queryContractCategoryList} from "@/api/ItemContractManagement/ContractCategory";
-  import {queryDepartmentTree} from "@/api/BasicInformationManagement/DepartmentManagement";
+  import {queryUserDepartmentTree} from "@/api/BasicInformationManagement/DepartmentManagement";
   import {queryEngineeringManageList} from "@/api/ProjectInformationManagement/ProjectItem/ProjectManagement";
-  import {queryFaxmByGcid,queryFaxmList} from "@/api/ProjectInformationManagement/ProjectItem/ItemSplit";
+  import {queryFaxmByGcid,queryProjectList} from "@/api/ProjectInformationManagement/ProjectItem/ItemSplit";
   const uploadColumns = [
     { title: '文件名称',dataIndex: 'fileName',key: 'fileName' ,width:200},
     { title: '文件路径',dataIndex: 'fileUrl',key: 'fileUrl',width:200},
@@ -598,8 +600,8 @@
     created () {
       this.queryContractInfoPage();
       this.queryContractCategoryList();
-      this.queryDepartmentTree();
-      this.queryFaxmList();
+      this.queryUserDepartmentTree();
+      this.queryProjectList();
     },
     methods: {
       //修改tree的key值
@@ -647,8 +649,8 @@
           })
       },
       //查询部门树
-      queryDepartmentTree(){
-        queryDepartmentTree()
+      queryUserDepartmentTree(){
+        queryUserDepartmentTree()
           .then(res => {
             if(res.code==2020200){
               this.DepartmentTree = res.data;
@@ -662,8 +664,8 @@
           })
       },
       //查询所属项目
-      queryFaxmList(){
-        queryFaxmList()
+      queryProjectList(){
+        queryProjectList()
           .then(res => {
             if(res.code==2020200){
               this.FaxmList = res.data;
@@ -713,8 +715,7 @@
                 warrantyPeriod:res.data.warrantyPeriod,
               };
               this.id = res.data.id;
-              console.log(JSON.parse(res.data.accessoriesUrl))
-              this.fileRecordList = JSON.parse(res.data.accessoriesUrl)==null?[]:JSON.parse(res.data.accessoriesUrl);
+              this.fileRecordList = res.data.accessoriesUrl==null?[]:JSON.parse(res.data.accessoriesUrl);
 
             }else{
               this.$message.info(res.message);

@@ -40,6 +40,15 @@ export const queryMenuTree = (data) => {
   })
 }
 /**
+ * 根据角色id查询当前选中按钮id集合
+ */
+export const getMenuIdsByRoleId = (data) => {
+  return axios({
+    url: '/web/permission/menu/getMenuIdsByRoleId/'+data.id,
+    method: 'get',
+  })
+}
+/**
  * 修改菜单
  */
 export const updateMenu = (data) => {

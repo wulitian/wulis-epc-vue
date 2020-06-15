@@ -126,7 +126,7 @@
           </a-col>
           <a-col :span="12">
             <a-form-model-item label="排序" prop="sort">
-              <a-input v-model="form.sort" placeholder="请输入序号"/>
+              <a-input-number  v-model="form.sort" :min="0" :max="100000" placeholder="请输入序号" style="width: 100%;"/>
             </a-form-model-item>
           </a-col>
           <a-col :span="12">
@@ -235,7 +235,7 @@
           </a-col>
           <a-col :span="12">
             <a-form-model-item label="排序" prop="sort">
-              <a-input v-model="form.sort" placeholder="请输入序号"/>
+              <a-input-number  v-model="form.sort" :min="0" :max="100000" placeholder="请输入序号" style="width: 100%;"/>
             </a-form-model-item>
           </a-col>
           <a-col :span="12">

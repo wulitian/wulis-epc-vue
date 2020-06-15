@@ -101,7 +101,7 @@
           <a-input v-model="form.departmentName" placeholder="部门名称"/>
         </a-form-model-item>
         <a-form-model-item label="排序" prop="sort">
-          <a-input-number id="inputNumber" v-model="form.sort" :min="0" :max="100000" />
+          <a-input-number  v-model="form.sort" :min="0" :max="100000" placeholder="请输入序号" style="width: 100%;"/>
         </a-form-model-item>
         <a-form-model-item label="是否启用" prop="enable">
             <a-radio-group v-model="form.enable">

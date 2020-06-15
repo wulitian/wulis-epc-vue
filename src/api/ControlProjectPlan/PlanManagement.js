@@ -31,11 +31,20 @@ export const queryPlanByid = (data) => {
   })
 }
 /**
- * 查询项目计划列表(分页)
+ * 查询项目计划列表(分页:施工方)
  */
 export const queryPlanPage = (data) => {
   return axios({
     url: '/web/ppc/plan/queryPlanPage?'+qs.stringify(data),
+    method: 'get',
+  })
+}
+/**
+ * 查询项目计划列表(分页:审核方)
+ */
+export const queryPlanAllPage = (data) => {
+  return axios({
+    url: '/web/ppc/plan/queryPlanAllPage?'+qs.stringify(data),
     method: 'get',
   })
 }

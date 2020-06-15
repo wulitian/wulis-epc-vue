@@ -111,7 +111,7 @@
 </template>
 
 <script>
-  import {deletePlanById,insertPlan,queryPlanByid,queryPlanPage,updatePlan,queryPlanDetail} from "@/api/ControlProjectPlan/PlanManagement";
+  import {deletePlanById,insertPlan,queryPlanByid,queryPlanPage,queryPlanAllPage,updatePlan,queryPlanDetail} from "@/api/ControlProjectPlan/PlanManagement";
   import {queryFaxmAll} from "@/api/ProjectInformationManagement/ProjectItem/ItemSplit";
   import {queryReviewTeamList} from "@/api/ControlProjectPlan/PlanAuditTeam";
 
@@ -300,21 +300,40 @@
       //查询
       queryPlanPage(){
         this.spinning = true;
-        queryPlanPage(Object.assign(this.page,this.headerForm))
-          .then(res => {
-            if(res.code==2020200){
-              console.log(res)
-              this.data = res.data.records;
-              this.total = res.data.total;
-              this.spinning = false;
-            }else{
-              this.$message.info(res.message);
-              this.spinning = false;
-            }
-          })
-          .catch((e) => {
-            console.log(e)
-          })
+        if(this.hasPermission('web:ppc:plan:queryPlanAllPage')){
+          queryPlanAllPage(Object.assign(this.page,this.headerForm))
+            .then(res => {
+              if(res.code==2020200){
+                console.log(res)
+                this.data = res.data.records;
+                this.total = res.data.total;
+                this.spinning = false;
+              }else{
+                this.$message.info(res.message);
+                this.spinning = false;
+              }
+            })
+            .catch((e) => {
+              console.log(e)
+            })
+        }else{
+          queryPlanPage(Object.assign(this.page,this.headerForm))
+            .then(res => {
+              if(res.code==2020200){
+                console.log(res)
+                this.data = res.data.records;
+                this.total = res.data.total;
+                this.spinning = false;
+              }else{
+                this.$message.info(res.message);
+                this.spinning = false;
+              }
+            })
+            .catch((e) => {
+              console.log(e)
+            })
+        }
+
       },
       queryFaxmAll(){
         queryFaxmAll()

@@ -7,7 +7,7 @@ import qs from 'qs'
  */
 export const getUserInfo = () => {
   return axios({
-    url: '/api/login',
+    url: '/web/queryUser',
     method: 'get',
   })
 }

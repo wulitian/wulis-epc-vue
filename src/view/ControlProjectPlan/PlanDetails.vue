@@ -193,7 +193,7 @@
     { title: '发起人',dataIndex: 'userName',key: 'userName' },
     { title: '材料类型',dataIndex: 'materialType',key: 'materialType' ,scopedSlots: { customRender: 'materialType' },},
     { title: '开始时间',dataIndex: 'createTime',key: 'createTime' },
-    { title: '审核状态',dataIndex: 'auditState',key: 'auditState' },
+    { title: '审核状态',dataIndex: 'roleType',key: 'roleType' },
     { title: '操作',dataIndex: 'action', scopedSlots: { customRender: 'action' } },
   ];
   const uploadColumns = [
@@ -203,22 +203,7 @@
     { title: '文件类型',dataIndex: 'fileExt',key: 'fileExt' ,width:200},
     { title: '操作',dataIndex: 'action', scopedSlots: { customRender: 'action' } ,width:200},
   ];
-  const data = [
-    {
-      id: '1',
-      materialName: '电缆铺线材料合同',
-      userName: '张三',
-      materialType: '2020-10-20',
-      auditState: '中介审核',
-    },
-    {
-      id: '2',
-      materialName: '配电设配AD-768购买合同',
-      userName: '李四',
-      materialType: '2020-10-20',
-      auditState: '项目审计',
-    },
-  ];
+  const data = [];
   //弹窗混入
   const modalMixins = {
     data () {
@@ -269,7 +254,7 @@
     data () {
       return {
         headerForm:{
-          auditState:'',
+          roleType:'',
           materialName:'',
         }
       }
@@ -431,7 +416,7 @@
         fileRecordList:[],
         fileList:[],
         contractInfoList:[],
-        queryApprovalStatus:''
+        approvalStatus:''
       }
     },
     created () {
@@ -447,7 +432,7 @@
         queryApprovalStatus({id:this.planId})
           .then(res=>{
             if(res.code==2020200){
-              this.queryApprovalStatus = res.data;
+              this.approvalStatus = res.data;
               console.log('res-----')
               console.log(res)
             }else{

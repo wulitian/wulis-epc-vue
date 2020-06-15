@@ -65,7 +65,10 @@
         {{form.remarks}}
       </a-descriptions-item>
       <a-descriptions-item label="相关附件">
-        <a-table :rowClassName="(record, index)=>{return index % 2 === 1? 'odd' : 'even'}" bordered :columns="uploadColumns" rowKey="id" :data-source="accessoriesUrl" :pagination="false">
+        <a-table :scroll="{ x: 400}" :rowClassName="(record, index)=>{return index % 2 === 1? 'odd' : 'even'}" bordered :columns="uploadColumns" rowKey="id" :data-source="accessoriesUrl" :pagination="false">
+            <span slot="action" slot-scope="text, record">
+                <a :href="record.fileUrl" :download="record.fileName" target="_blank">下载</a>
+            </span>
         </a-table>
       </a-descriptions-item>
     </a-descriptions>
@@ -74,13 +77,18 @@
         {{form.materialName}}
       </a-descriptions-item>
       <a-descriptions-item label="相关附件">
-        <a-table :rowClassName="(record, index)=>{return index % 2 === 1? 'odd' : 'even'}" bordered :columns="uploadColumns" rowKey="id" :data-source="materialUrl" :pagination="false">
+        <a-table :scroll="{ x: 400}" :rowClassName="(record, index)=>{return index % 2 === 1? 'odd' : 'even'}" bordered :columns="uploadColumns" rowKey="id" :data-source="materialUrl" :pagination="false">
+            <span slot="action" slot-scope="text, record">
+                <a :href="record.fileUrl" :download="record.fileName" target="_blank">下载</a>
+            </span>
         </a-table>
       </a-descriptions-item>
     </a-descriptions>
     <a-steps :current="1" style="margin: 20px 0">
       <a-step :title="contractor.organizationName" :description="'上报人：'+contractor.initiator" />
-      <a-step v-for="(item,i) in approvalNodes" :key="i" :title="item.roleName" :description="item.approvalResult==1?'已审批':'待审批'" />
+      <a-step :key="1" :title="approvalNodes[0].roleName" :status="approvalNodes[0].approvalResult==1?'finish':'process'" :description="approvalNodes[0].approvalResult==1?'已审批':'待审批'" />
+      <a-step :key="2" :title="approvalNodes[1].roleName" :status="approvalNodes[1].approvalResult==1?'finish':(approvalNodes[0].approvalResult==1)?'process':'wait'" :description="approvalNodes[1].approvalResult==1?'已审批':'待审批'" />
+      <a-step :key="3" :title="approvalNodes[2].roleName" :status="approvalNodes[2].approvalResult==1?'finish':(approvalNodes[1].approvalResult==1)?'process':'wait'" :description="approvalNodes[2].approvalResult==1?'已审批':'待审批'" />
     </a-steps>
     <!-- 列表 -->
     <a-spin :spinning="spinning">
@@ -177,6 +185,7 @@
     { title: '文件路径',dataIndex: 'fileUrl',key: 'fileUrl',width:100},
     { title: '文件大小',dataIndex: 'fileSize',key: 'fileSize',width:100},
     { title: '文件类型',dataIndex: 'fileExt',key: 'fileExt' ,width:100},
+    { title: '操作',dataIndex: 'action', scopedSlots: { customRender: 'action' },width:100 },
   ];
   //列表混入
   const tableMixins = {
@@ -235,7 +244,24 @@
       data:[],
       total:0,
       contractor:{},
-      approvalNodes:[],
+      approvalNodes:[
+        {
+          roleName:'',
+          approvalResult:''
+        },
+        {
+          roleName:'',
+          approvalResult:''
+        },
+        {
+          roleName:'',
+          approvalResult:''
+        },
+        {
+          roleName:'',
+          approvalResult:''
+        }
+      ],
       approvalResult:'',
       materialUrl:[],
       accessoriesUrl:[],
@@ -256,11 +282,10 @@
       queryPlanMaterial({id:this.id})
         .then(res => {
           if(res.code==2020200){
-            console.log(res)
             this.form = res.data;
             this.materialType = res.data.materialType;
-            this.materialUrl = JSON.parse(res.data.materialUrl)==null?[]:JSON.parse(res.data.materialUrl);
-            this.accessoriesUrl = JSON.parse(res.data.accessoriesUrl)==null?[]:JSON.parse(res.data.accessoriesUrl);
+            this.materialUrl = res.data.materialUrl==null?[]:JSON.parse(res.data.materialUrl);
+            this.accessoriesUrl = res.data.accessoriesUrl==null?[]:JSON.parse(res.data.accessoriesUrl);
             this.spinning = false;
           }else{
             this.$message.info(res.message);
@@ -336,12 +361,14 @@
     onApprove(){
       this.$refs.ruleForm.validate(valid => {
         if (valid) {
-          materialReview(Object.assign(this.form,{materialId:this.id}))
+          materialReview(Object.assign(this.ApproveForm,{materialId:this.id}))
             .then(res => {
               if(res.code==2020200){
                 console.log(res);
                 this.modalState = false;
                 this.queryMaterialReviewStatus();
+                this.queryMaterialReviewList();
+                this.queryMaterialReviewProgress();
                 this.$message.info(res.message);
               }else{
                 this.modalState = false;

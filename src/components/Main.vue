@@ -8,7 +8,7 @@
             </a>
             <a-menu slot="overlay">
               <a-menu-item key="0">
-                <a href="http://www.alipay.com/">个人中心</a>
+                <a href="#" @click="userInfo">个人中心</a>
               </a-menu-item>
               <a-menu-item key="1">
                 <a href="#" @click="userLogout">退出登录</a>
@@ -40,9 +40,23 @@
             </a-layout-content>
           </a-layout>
         </a-layout>
+        <a-modal
+          title="用户基本信息"
+          :visible="visible"
+          @cancel="handleCancel"
+          :footer="null"
+        >
+          <div>用户名称：{{user.userName}}</div>
+          <div>账号：{{user.account}}</div>
+          <div>性别：{{user.sex}}</div>
+          <div>电话号：{{user.phoneNumber}}</div>
+          <div>邮箱：{{user.mail}}</div>
+          <div>备注：{{user.remark}}</div>
+        </a-modal>
   </a-layout>
 </template>
 <script>
+  import {getUserInfo} from "@/api/login";
   import SubMenu from './SubMenu'
   import Breadcrumb from '@/components/Breadcrumb'
   import { mapActions } from 'vuex'
@@ -56,6 +70,16 @@
       return {
         collapsed: false,
         openkeys:[],
+        visible:false,
+        user:{
+          mail:'',
+          phoneNumber:'',
+          remark:'',
+          roleIds:'',
+          sex:'',
+          userName:'',
+          account:'',
+        }
       }
     },
     computed: {
@@ -68,6 +92,27 @@
     },
     methods:{
       ...mapActions(['Logout']),
+      userToInfo(){
+
+      },
+      userInfo(){
+        getUserInfo()
+          .then(res => {
+            if(res.code==2020200){
+              console.log(res)
+              this.user = res.data;
+              this.visible = true;
+            }else{
+              this.$message.info(res.message);
+            }
+          })
+          .catch((e) => {
+            console.log(e)
+          })
+      },
+      handleCancel(){
+        this.visible=false;
+      },
       getOpenKey(){
         if(this.$route.path!='/main/Workplace'){
           this.openkeys.push(this.$store.getters.routerList.find(item => item.id===(this.$store.getters.routerList.find(item => item.path === this.$route.path).parentId)).path);
