@@ -86,13 +86,23 @@
     </a-descriptions>
     <a-steps :current="1" style="margin: 20px 0">
       <a-step :title="contractor.organizationName" :description="'上报人：'+contractor.initiator" />
-      <a-step :key="1" :title="approvalNodes[0].roleName" :status="approvalNodes[0].approvalResult==1?'finish':'process'" :description="approvalNodes[0].approvalResult==1?'已审批':'待审批'" />
-      <a-step :key="2" :title="approvalNodes[1].roleName" :status="approvalNodes[1].approvalResult==1?'finish':(approvalNodes[0].approvalResult==1)?'process':'wait'" :description="approvalNodes[1].approvalResult==1?'已审批':'待审批'" />
-      <a-step :key="3" :title="approvalNodes[2].roleName" :status="approvalNodes[2].approvalResult==1?'finish':(approvalNodes[1].approvalResult==1)?'process':'wait'" :description="approvalNodes[2].approvalResult==1?'已审批':'待审批'" />
+      <a-step v-for="(item,i) in approvalNodes" :key="i" :title="item.roleName" :status="item.approvalResult==1?'finish':item.approvalResult==-1?'error':'wait'" :description="item.approvalResult==1?'已审批':item.approvalResult==-1?'已驳回':'待审批'" />
+      <!--<a-step :key="1" :title="approvalNodes[0].roleName" :status="approvalNodes[0].approvalResult==1?'finish':'process'" :description="approvalNodes[0].approvalResult==1?'已审批':'待审批'" />-->
+      <!--<a-step :key="2" :title="approvalNodes[1].roleName" :status="approvalNodes[1].approvalResult==1?'finish':(approvalNodes[0].approvalResult==1)?'process':'wait'" :description="approvalNodes[1].approvalResult==1?'已审批':'待审批'" />-->
+      <!--<a-step :key="3" :title="approvalNodes[2].roleName" :status="approvalNodes[2].approvalResult==1?'finish':(approvalNodes[1].approvalResult==1)?'process':'wait'" :description="approvalNodes[2].approvalResult==1?'已审批':'待审批'" />-->
     </a-steps>
     <!-- 列表 -->
     <a-spin :spinning="spinning">
-      <a-table :rowClassName="(record, index)=>{return index % 2 === 1? 'odd' : 'even'}" bordered :columns="columns" rowKey="id" :data-source="data" :pagination="false"></a-table>
+      <a-table :rowClassName="(record, index)=>{return index % 2 === 1? 'odd' : 'even'}" bordered :columns="columns" rowKey="id" :data-source="data" :pagination="false">
+        <span slot="approvalResult" slot-scope="approvalResult">
+         <a-tag color="pink" v-if="approvalResult==-1">
+           已驳回
+        </a-tag>
+        <a-tag color="green" v-if="approvalResult==1">
+          已同意
+        </a-tag>
+      </span>
+      </a-table>
     </a-spin>
     <!--弹窗-->
     <a-modal v-model="modalState" :title="modalTitle" :footer="null">
@@ -112,9 +122,6 @@
         </a-form-model-item>
         <a-form-model-item label="审批结果" prop="approvalResult">
           <a-radio-group v-model="ApproveForm.approvalResult">
-            <a-radio :value="0">
-              未审核
-            </a-radio>
             <a-radio :value="-1">
               驳回
             </a-radio>
@@ -135,12 +142,11 @@
     </a-modal>
     <!-- 操作 -->
     <div style="text-align: center;margin-top: 10px">
-
+      <a-button type="primary" @click="goBack">
+        返回
+      </a-button>
       <span v-if="hasPermission('web:ppc:plan:approval:queryMaterialReviewStatus')">
         <span v-if="hasPermission('web:ppc:plan:approval:materialReview')">
-           <a-button type="primary" @click="goBack">
-            返回
-          </a-button>
           <a-button  v-if="approvalResult=='-1'">
             已驳回
           </a-button>
@@ -203,7 +209,7 @@
     { title: '处理人',dataIndex: 'approvedBy',key: 'approvedBy' },
     { title: '描述',dataIndex: 'description',key: 'description' },
     { title: '意见',dataIndex: 'opinion',key: 'opinion' },
-    { title: '审批结果',dataIndex: 'approvalResult',key: 'approvalResult' },
+    { title: '审批结果',dataIndex: 'approvalResult',key: 'approvalResult' , scopedSlots: { customRender: 'approvalResult' }},
     { title: '时间',dataIndex: 'createTime',key: 'createTime' },
   ];
   export default {
@@ -273,7 +279,9 @@
     this.queryPlanMaterial();
     this.queryMaterialReviewList();
     this.queryMaterialReviewProgress();
-    this.queryMaterialReviewStatus();
+    if(this.hasPermission('web:ppc:plan:approval:queryMaterialReviewStatus')){
+      this.queryMaterialReviewStatus();
+    }
   },
   methods:{
     //查询计划详情

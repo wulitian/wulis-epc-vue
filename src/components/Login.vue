@@ -1,5 +1,6 @@
 <template>
   <div class="container">
+    <a-spin :spinning="spinning">
     <div class="login-form-group">
       <div class="left-group"></div>
       <div class="bt"><img src="../../static/images/logo2.png"><span>沂水县供电公司电力工程项目管理平台</span></div>
@@ -13,6 +14,7 @@
       </div>
       <button @click="gotoToken">登录</button>
     </div>
+    </a-spin>
   </div>
 </template>
 
@@ -27,8 +29,10 @@
     return {
       spinning:false,
       form:{
-        account:'administrator',
-        password:'123456',
+        // account:'administrator',
+        // password:'123456',
+        account:'',
+        password:'',
       },
     }
   },
@@ -38,14 +42,23 @@
   methods:{
     ...mapActions(['GetUserInfo', 'Login']),
     gotoToken(){
-      this.spinning = true;
       Vue.ls.remove(ACCESS_TOKEN);
+      if(this.form.account == ''){
+        this.$message.info("请输入账号");
+        return false;
+      }
+      if(this.form.password == ''){
+        this.$message.info("请输入密码");
+        return false;
+      }
+      this.spinning = true;
       this.Login(this.form)
         .then((res) => {
           if(res.code==2020200){
             this.spinning = false;
             this.$router.push("/")
           }else{
+            this.spinning = false;
             this.$message.info(res.message);
           }
         })

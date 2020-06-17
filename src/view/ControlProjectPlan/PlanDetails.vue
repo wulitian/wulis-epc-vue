@@ -6,23 +6,27 @@
       @back="() => $router.go(-1)"
     >
       <template slot="extra">
-        <a-button key="1" v-if="hasPermission('web:ppc:plan:detail:applyNextPlanProcess')&&descriptions.planStage==0" @click="applyNextPlanProcess">
+        <span v-if="hasPermission('web:ppc:plan:detail:applyNextPlanProcess')">
+          <a-button key="1" v-if="hasPermission('web:ppc:plan:detail:applyNextPlanProcess')&&descriptions.planStage==0" @click="applyNextPlanProcess">
           开始施工
-        </a-button>
-        <span v-if="descriptions.planStage==1">申请施工状态</span>
-        <a-button key="2" v-if="hasPermission('web:ppc:plan:detail:applyNextPlanProcess')&&descriptions.planStage==2" @click="applyNextPlanProcess">
-          中期施工
-        </a-button>
-        <span v-if="descriptions.planStage==3">申请中期施工</span>
-        <a-button key="3" v-if="hasPermission('web:ppc:plan:detail:applyNextPlanProcess')&&descriptions.planStage==4" @click="applyNextPlanProcess">
-          结束竣工
-        </a-button>
-        <span v-if="descriptions.planStage==5">申请竣工状态</span>
-        <span v-if="descriptions.planStage==6">竣工阶段</span>
-        <a-button key="4" type="primary" v-if="hasPermission('web:ppc:plan:detail:approvalNextPlanProcess')" @click="approvalNextPlanProcess('0')">
+          </a-button>
+          <span v-if="descriptions.planStage==1">申请施工状态</span>
+          <a-button key="2" v-if="hasPermission('web:ppc:plan:detail:applyNextPlanProcess')&&descriptions.planStage==2" @click="applyNextPlanProcess">
+            中期施工
+          </a-button>
+          <span v-if="descriptions.planStage==3">申请中期施工</span>
+          <a-button key="3" v-if="hasPermission('web:ppc:plan:detail:applyNextPlanProcess')&&descriptions.planStage==4" @click="applyNextPlanProcess">
+            结束竣工
+          </a-button>
+          <span v-if="descriptions.planStage==5">申请竣工状态</span>
+          <span v-if="descriptions.planStage==6">竣工阶段</span>
+        </span>
+        <a-button key="4" type="primary" v-if="hasPermission('web:ppc:plan:detail:approvalNextPlanProcess')&&approvalStatus=='0'" @click="approvalNextPlanProcess('-1')">
           驳回
         </a-button>
-        <a-button key="5" type="primary" v-if="hasPermission('web:ppc:plan:detail:approvalNextPlanProcess')" @click="approvalNextPlanProcess('1')">
+        <span v-if="hasPermission('web:ppc:plan:detail:approvalNextPlanProcess')&&approvalStatus=='1'">已同意</span>
+        <span v-if="hasPermission('web:ppc:plan:detail:approvalNextPlanProcess')&&approvalStatus=='-1'">已驳回</span>
+        <a-button key="5" type="primary" v-if="hasPermission('web:ppc:plan:detail:approvalNextPlanProcess')&&approvalStatus=='0'" @click="approvalNextPlanProcess('1')">
           同意
         </a-button>
       </template>
@@ -80,6 +84,14 @@
         </a-tag>
         <a-tag color="pink" v-if="materialType==1">
           合同
+        </a-tag>
+      </span>
+      <span slot="auditState" slot-scope="auditState">
+         <a-tag color="green" v-if="auditState==0">
+           审核中
+        </a-tag>
+        <a-tag color="pink" v-if="auditState==1">
+          已审核
         </a-tag>
       </span>
         <span slot="action" slot-scope="text, record">
@@ -193,7 +205,7 @@
     { title: '发起人',dataIndex: 'userName',key: 'userName' },
     { title: '材料类型',dataIndex: 'materialType',key: 'materialType' ,scopedSlots: { customRender: 'materialType' },},
     { title: '开始时间',dataIndex: 'createTime',key: 'createTime' },
-    { title: '审核状态',dataIndex: 'roleType',key: 'roleType' },
+    { title: '审核状态',dataIndex: 'auditState',key: 'auditState' , scopedSlots: { customRender: 'auditState' } },
     { title: '操作',dataIndex: 'action', scopedSlots: { customRender: 'action' } },
   ];
   const uploadColumns = [
@@ -254,7 +266,7 @@
     data () {
       return {
         headerForm:{
-          roleType:'',
+          auditState:'',
           materialName:'',
         }
       }
@@ -433,8 +445,6 @@
           .then(res=>{
             if(res.code==2020200){
               this.approvalStatus = res.data;
-              console.log('res-----')
-              console.log(res)
             }else{
               this.$message.info(res.message);
             }
@@ -447,6 +457,7 @@
         applyNextPlanProcess({id:this.planId})
           .then(res=>{
             if(res.code==2020200){
+              this.queryPlanDetail({id:this.planId})
               console.log(res)
             }else{
               this.$message.info(res.message);
@@ -460,6 +471,7 @@
         approvalNextPlanProcess({id:this.planId,approvalResult:zt})
           .then(res=>{
             if(res.code==2020200){
+              this.queryApprovalStatus();
               console.log(res)
             }else{
               this.$message.info(res.message);
